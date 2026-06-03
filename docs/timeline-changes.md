@@ -26,3 +26,26 @@ Append-only log of agent changes. Do not overwrite existing lines.
 
 ### Phase 3: Native Sharing
 - **Created** `lib/share.ts` — `sharePaymentLink(url, note?)` tries Web Share API first, falls back to WhatsApp deep link (`wa.me/?text=...`). Ready to be called after a `CREATE_INVOICE` SUCCESS response.
+
+---
+
+## 2026-06-03 — Eyitayo (Frontend UI) — Phase 2
+- **Created** `components/BottomNav.tsx` — mobile-first bottom navigation bar for tab switching.
+- **Created** `hooks/useLedger.ts` — mock polling hook for ledger balance and transactions.
+- **Created** `components/FinancialDashboard.tsx` — built mock operational balance and ledger feed UI using Shadcn cards and CSS variables.
+- **Created** `components/CafeOneUI.tsx` — built lightweight mockup interface displaying workspace logistics.
+- **Updated** `app/page.tsx` — restructured to conditionally render the Voice tab, Financial Dashboard, or Cafe One UI based on BottomNav state.
+
+## 2026-06-03 — Eyitayo (Frontend UI) — Phase 3
+- **Created** `lib/mockTranscribe.ts` — API mock function simulating Aethana AI + LLM processing latency and returning structured JSON.
+- **Created** `components/CheckoutModule.tsx` — UI for rendering `CREATE_INVOICE` intent and wired it to Adepitan's WhatsApp sharing fallback.
+- **Updated** `app/page.tsx` — connected the voice states directly with the mock ML output and conditionally rendered the CheckoutModule smoothly.
+
+---
+
+## 2026-06-03 — Eyitayo (Frontend UI) — UI Revamp
+- **Updated** `app/layout.tsx` — switched default to light mode and updated `themeColor` to `#FDFBF7`.
+- **Updated** `app/globals.css` — overhauled global palette to feature cream background (`#FDFBF7`), stark black text, and velvet red-brown primary accents (`#7A1F2D`).
+- **Moved** `app/page.tsx` to `app/dashboard/page.tsx` — relocated the main application into a dedicated dashboard route.
+- **Created** `app/page.tsx` — built a new mobile-first Landing Page highlighting the Voice-to-Value proposition with a CTA routing to the dashboard.
+- **Updated** `components/AudioButton.tsx` — refined shadow artifacts and text colors for light mode contrast.
