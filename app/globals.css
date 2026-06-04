@@ -10,19 +10,7 @@
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -39,6 +27,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -47,7 +36,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* ── V2V brand tokens (per AGENTS.md §🎨) ───────────────────── */
+  /* ── V2V brand tokens ───────────────────── */
   --color-brand: var(--brand);
   --color-brand-light: var(--brand-light);
   --color-brand-dark: var(--brand-dark);
@@ -57,144 +46,66 @@
 }
 
 :root {
-  /* ── V2V palette (ported from the prototype's :root) ──────────── */
-  --b50: #EEF4FF;
-  --b100: #DAE6FD;
-  --b200: #B8D0FB;
-  --b300: #84AFF7;
-  --b400: #4F8CF2;
-  --b500: #2563EB;
-  --b600: #1A4FCC;
-  --b700: #1641A6;
-  --b800: #163580;
+  /* ── V2V Velvet Palette ──────────── */
+  --cream-bg: #FDFBF7;
+  --velvet-primary: #7A1F2D;
+  --velvet-light: #A33A4A;
+  --velvet-dark: #4A1019;
+  
+  --black-base: #121212;
+  --black-muted: #404040;
+  --black-faint: #E5E5E5;
 
-  --n0: #FFFFFF;
-  --n50: #F8FAFC;
-  --n75: #F3F6FA;
-  --n100: #F1F5F9;
-  --n150: #E8EDF5;
-  --n200: #E2E8F0;
-  --n300: #CBD5E1;
-  --n400: #94A3B8;
-  --n500: #64748B;
-  --n600: #475569;
-  --n700: #334155;
-  --n800: #1E293B;
-  --n900: #0F172A;
+  --pure-white: #FFFFFF;
 
-  --green: #15803D;
-  --gmid: #16A34A;
-  --gbg: #F0FDF4;
-  --glight: #DCFCE7;
+  --success-color: #16A34A;
+  --warning-color: #D97706;
+  --destructive-color: #DC2626;
 
-  --red: #DC2626;
-  --rbg: #FEF2F2;
-  --rlight: #FEE2E2;
-
-  --amber: #B45309;
-  --amid: #D97706;
-  --abg: #FFFBEB;
-  --alight: #FEF3C7;
-
-  --purple: #6D28D9;
-  --pbg: #F5F3FF;
-  --plight: #EDE9FE;
-
-  --teal: #0D9488;
-  --tbg: #F0FDFA;
-
-  /* prototype radii (px) — alongside the shadcn rem-scaled `--radius` */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
-  --r-2xl: 24px;
-  --r-full: 9999px;
+  /* prototype radii */
+  --radius: 0.75rem;
 
   /* prototype shadows */
   --sh: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 16px rgba(0, 0, 0, 0.05);
   --sh-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --sh-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-  /* ── Brand semantic tokens (AGENTS.md names) ──────────────────────── */
-  --brand: var(--b500);
-  --brand-light: var(--b100);
-  --brand-dark: var(--b700);
-  --success: var(--gmid);
-  --warning: var(--amid);
-  --info: var(--purple);
+  /* ── Brand semantic tokens ──────────────────────── */
+  --brand: var(--velvet-primary);
+  --brand-light: var(--velvet-light);
+  --brand-dark: var(--velvet-dark);
+  --success: var(--success-color);
+  --warning: var(--warning-color);
+  --info: #000000;
 
-  /* ── shadcn semantic vars — re-skinned to the prototype palette ─── */
-  --background: var(--n0);
-  --foreground: var(--n900);
-  --card: var(--n0);
-  --card-foreground: var(--n900);
-  --popover: var(--n0);
-  --popover-foreground: var(--n900);
-  --primary: var(--b500);
-  --primary-foreground: var(--n0);
-  --secondary: var(--n50);
-  --secondary-foreground: var(--n700);
-  --muted: var(--n100);
-  --muted-foreground: var(--n500);
-  --accent: var(--b50);
-  --accent-foreground: var(--b700);
-  --destructive: var(--red);
-  --border: var(--n200);
-  --input: var(--n200);
-  --ring: var(--b500);
-  --radius: 0.75rem;
-  /* 12px — matches prototype --r-md */
-
-  /* Sidebar / chart vars kept at shadcn defaults (unused in V2V, but
-     components/ui/sidebar.tsx is in the tree and references them). */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-}
-
-.dark {
-  --background: var(--n900);
-  --foreground: var(--n50);
-  --card: var(--n800);
-  --card-foreground: var(--n50);
-  --popover: var(--n800);
-  --popover-foreground: var(--n50);
-  --primary: var(--b400);
-  --primary-foreground: var(--n900);
-  --secondary: var(--n800);
-  --secondary-foreground: var(--n100);
-  --muted: var(--n800);
-  --muted-foreground: var(--n400);
-  --accent: var(--n800);
-  --accent-foreground: var(--n50);
-  --destructive: var(--red);
-  --border: color-mix(in oklch, var(--n0) 10%, transparent);
-  --input: color-mix(in oklch, var(--n0) 15%, transparent);
-  --ring: var(--b400);
-
-  --brand: var(--b400);
-  --brand-light: var(--b200);
-  --brand-dark: var(--b700);
-
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ── shadcn semantic vars ─── */
+  --background: var(--cream-bg);
+  --foreground: var(--black-base);
+  
+  --card: var(--pure-white);
+  --card-foreground: var(--black-base);
+  
+  --popover: var(--pure-white);
+  --popover-foreground: var(--black-base);
+  
+  --primary: var(--velvet-primary);
+  --primary-foreground: var(--cream-bg);
+  
+  --secondary: var(--black-faint);
+  --secondary-foreground: var(--black-base);
+  
+  --muted: var(--black-faint);
+  --muted-foreground: var(--black-muted);
+  
+  --accent: var(--velvet-light);
+  --accent-foreground: var(--cream-bg);
+  
+  --destructive: var(--destructive-color);
+  --destructive-foreground: var(--pure-white);
+  
+  --border: var(--black-faint);
+  --input: var(--black-faint);
+  --ring: var(--velvet-primary);
 }
 
 @layer base {

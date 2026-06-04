@@ -51,3 +51,49 @@ export interface LedgerEntry {
   status: "PENDING" | "SUCCESS" | "FAILED";
   created_at: string;
 }
+
+// ==========================================
+// Voice → Action (Day 4)
+// ==========================================
+export interface NegotiationTurn {
+  role: "user" | "agent";
+  text: string;
+  proposed_amount?: number;
+  at: string;
+}
+
+export interface NegotiationSessionState {
+  id: string;
+  merchant_id: string;
+  status: "open" | "agreed" | "failed";
+  context: {
+    counterparty: string;
+    target_amount: number;
+    last_offer?: number;
+    agreed_amount?: number;
+    [key: string]: unknown;
+  };
+  turns: NegotiationTurn[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type ActionResult =
+  | {
+      intent_type: "CREATE_INVOICE";
+      message: string;
+      authorization_url: string;
+      reference: string;
+    }
+  | {
+      intent_type: "CHECK_BALANCE";
+      message: string;
+      balance: { kobo: number; ngn: number; currency: string };
+    }
+  | {
+      intent_type: "RUN_NEGOTIATION";
+      message: string;
+      reply: string;
+      proposedTerms: { amount: number; counterparty: string };
+      session: NegotiationSessionState;
+    };
