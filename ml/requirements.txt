@@ -1,0 +1,18 @@
+# ML Pipeline Service Dependencies
+# Install with: pip install -r requirements.txt
+
+# Groq LLM API
+groq>=0.4.0
+
+# HTTP requests
+requests>=2.31.0
+
+# Flask web framework
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Audio processing (optional, for local audio file handling)
+# pydub>=0.25.0
