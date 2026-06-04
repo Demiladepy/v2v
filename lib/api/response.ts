@@ -35,6 +35,10 @@ export function badRequest(error: string, details?: unknown): Response {
   return jsonResponse(400, { ok: false, error, details });
 }
 
+export function unprocessableEntity(error: string, details?: unknown): Response {
+  return jsonResponse(422, { ok: false, error, details });
+}
+
 export function internalError(error = "Internal server error"): Response {
   return jsonResponse(500, { ok: false, error });
 }
