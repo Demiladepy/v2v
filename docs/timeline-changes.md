@@ -2,11 +2,11 @@
 
 Append-only log of agent changes. Do not overwrite existing lines.
 
-- 2026-06-03 — Demilade: Day 1 backend boilerplate — Next.js API routes (`/api/health`, `/api/financial/router`), Zod validation aligned with `types/index.ts`, shared API response envelope, Vitest suite, and `.env.example` template.
-- 2026-06-03 — Demilade: Day 2 Supabase persistence — `transactions` migration, server-only Supabase client, `lib/db/ledger.ts` repository, CHECK_BALANCE reads real aggregated balance, route handlers wired to Supabase (mocked in tests).
-- 2026-06-03 — Demilade: Day 3 Paystack — initialize checkout for CREATE_INVOICE, webhook signature verification on raw body, idempotent settlement via reference + event id, Vitest coverage for valid/invalid/duplicate webhooks.
-- 2026-06-03 — Demilade: Day 4 voice orchestration — POST /api/voice/process, IntentParser + NegotiationAgent interfaces with stubs, negotiation_sessions migration, unified ActionResult dispatch.
-- 2026-06-03 — Demilade: Day 5 hardening — structured logging + x-request-id, idempotency for CREATE_INVOICE, in-memory rate limiting, centralized error mapper, integration demo-path test, seed/smoke scripts, README deploy section, DEMO_RUNBOOK.md.
+- 2026-06-03 — Demilade: Day 1 backend boilerplate — Next.js API routes (`/api/health`, `/api/financial/router`), Zod validation aligned with `types/index.ts`, shared API response envelope, Vit[...]
+- 2026-06-03 — Demilade: Day 2 Supabase persistence — `transactions` migration, server-only Supabase client, `lib/db/ledger.ts` repository, CHECK_BALANCE reads real aggregated balance, route ha[...]
+- 2026-06-03 — Demilade: Day 3 Paystack — initialize checkout for CREATE_INVOICE, webhook signature verification on raw body, idempotent settlement via reference + event id, Vitest coverage for[...]
+- 2026-06-03 — Demilade: Day 4 voice orchestration — POST /api/voice/process, IntentParser + NegotiationAgent interfaces with stubs, negotiation_sessions migration, unified ActionResult dispatc[...]
+- 2026-06-03 — Demilade: Day 5 hardening — structured logging + x-request-id, idempotency for CREATE_INVOICE, in-memory rate limiting, centralized error mapper, integration demo-path test, seed[...]
 
 ---
 
@@ -18,7 +18,7 @@ Append-only log of agent changes. Do not overwrite existing lines.
   - Streams in 100ms timeslices for future backend streaming capability.
   - Typed permission states: `prompt | granted | denied | unsupported`.
   - Granular `DOMException` handling (`NotAllowedError`, `NotFoundError`, `NotReadableError`).
-- **Updated** `app/page.tsx` — wired `useAudioRecorder` into `handleStartRecording` / `handleStopRecording`, replacing the dummy `setTimeout` flow. Real audio `Blob` is produced on stop; mock pipeline runs until Demilade's `/api/transcribe` is live. Added `ERROR` state display with "Try again" affordance.
+- **Updated** `app/page.tsx` — wired `useAudioRecorder` into `handleStartRecording` / `handleStopRecording`, replacing the dummy `setTimeout` flow. Real audio `Blob` is produced on stop; mock pi[...]
 - **Fixed** `min-h-[100dvh]` → `min-h-dvh` in `page.tsx` and `layout.tsx`.
 
 ### Phase 2: PWA Architecture
@@ -29,7 +29,7 @@ Append-only log of agent changes. Do not overwrite existing lines.
 - **Updated** `app/layout.tsx` — added `ServiceWorkerRegistrar` into the body; fixed `min-h-dvh`.
 
 ### Phase 3: Native Sharing
-- **Created** `lib/share.ts` — `sharePaymentLink(url, note?)` tries Web Share API first, falls back to WhatsApp deep link (`wa.me/?text=...`). Ready to be called after a `CREATE_INVOICE` SUCCESS response.
+- **Created** `lib/share.ts` — `sharePaymentLink(url, note?)` tries Web Share API first, falls back to WhatsApp deep link (`wa.me/?text=...`). Ready to be called after a `CREATE_INVOICE` SUCCESS[...]
 
 ---
 
@@ -53,3 +53,19 @@ Append-only log of agent changes. Do not overwrite existing lines.
 - **Moved** `app/page.tsx` to `app/dashboard/page.tsx` — relocated the main application into a dedicated dashboard route.
 - **Created** `app/page.tsx` — built a new mobile-first Landing Page highlighting the Voice-to-Value proposition with a CTA routing to the dashboard.
 - **Updated** `components/AudioButton.tsx` — refined shadow artifacts and text colors for light mode contrast.
+
+---
+
+## 2026-06-04 — Precious (ML & Data Pipeline) — Phase 1 (ML Service Server)
+
+### Flask ML Service Server (wraps intent_pipeline.py)
+- **Created** `ml/app.py` — Flask server exposing HTTP endpoints for STT + intent parsing. Routes: `POST /transcribe` (Aethex STT), `POST /parse-intent` (Groq LLM), `POST /process-voice` (full pipeline), `GET /health`. Includes CORS for Next.js integration.
+- **Created** `ml/requirements.txt` — Python dependencies: groq, requests, Flask, flask-cors, python-dotenv. Pins versions for reproducibility.
+- **Created** `ml/Dockerfile` — Multi-stage Docker image; builds on python:3.11-slim; exposes port 5000; includes healthcheck; ready for container deployment (Railway, Render, GCP Cloud Run).
+- **Created** `docker-compose.yml` — Orchestrates ML service container + optional Next.js service; mounts ml/ for live code reloading in dev; sets env vars for Aethex + Groq keys.
+- **Created** `ml/README.md` — Comprehensive deployment guide: local dev setup, curl examples for all endpoints, Docker build/run, docker-compose, production deployment (Railway/Render/Cloud Run), troubleshooting, environment variables.
+
+### Integration with Next.js
+- ML service runs on `http://localhost:5000` (or deployed URL)
+- Next.js calls `ML_INTENT_PARSER_URL` when `INTENT_PARSER_MODE=ml`
+- Existing `lib/intent/parser.ts` (mlIntentParser function) already handles the HTTP call; Precious just needed to wrap Python pipeline in Flask
