@@ -1,46 +1,49 @@
-import { ok, badRequest, unprocessableEntity } from "@/lib/api/response";
+import { ok, badRequest } from "@/lib/api/response";
+import { handleRoute } from "@/lib/api/handle-route";
+import { mapErrorToResponse } from "@/lib/api/errors";
 import { dispatchIntent } from "@/lib/intent/dispatch";
-import {
-  isIntentParserError,
-  parseTranscript,
-} from "@/lib/intent/parser";
+import { parseTranscript } from "@/lib/intent/parser";
 import { getDefaultMerchantId } from "@/lib/server/merchant";
 import { parseJsonBody } from "@/lib/server/parse-json-body";
 import { voiceProcessRequestSchema } from "@/lib/validations/voice";
 
 export async function POST(request: Request) {
-  const body = await parseJsonBody(request);
+  const merchantId = getDefaultMerchantId();
 
-  if (!body.success) {
-    return badRequest(body.error);
-  }
+  return handleRoute(
+    request,
+    "POST /api/voice/process",
+    async (req, ctx) => {
+      const body = await parseJsonBody(req);
 
-  const validated = voiceProcessRequestSchema.safeParse(body.data);
+      if (!body.success) {
+        return badRequest(body.error);
+      }
 
-  if (!validated.success) {
-    return badRequest("Validation failed", validated.error.format());
-  }
+      const validated = voiceProcessRequestSchema.safeParse(body.data);
 
-  const merchantId =
-    validated.data.merchant_id?.trim() || getDefaultMerchantId();
+      if (!validated.success) {
+        return badRequest("Validation failed", validated.error.format());
+      }
 
-  try {
-    const parsed = await parseTranscript(validated.data.transcript);
-    const result = await dispatchIntent(
-      parsed,
-      merchantId,
-      validated.data.transcript
-    );
+      const resolvedMerchant =
+        validated.data.merchant_id?.trim() || merchantId;
+      ctx.merchantId = resolvedMerchant;
 
-    return ok(result);
-  } catch (error) {
-    if (isIntentParserError(error)) {
-      return unprocessableEntity(error.message, error.details);
-    }
+      try {
+        const parsed = await parseTranscript(validated.data.transcript);
+        const result = await dispatchIntent(
+          parsed,
+          resolvedMerchant,
+          validated.data.transcript,
+          { idempotencyHeader: req.headers.get("Idempotency-Key") }
+        );
 
-    const message =
-      error instanceof Error ? error.message : "Action dispatch failed";
-
-    return unprocessableEntity(message);
-  }
+        return ok(result);
+      } catch (error) {
+        return mapErrorToResponse(error, ctx);
+      }
+    },
+    { rateLimit: "public", merchantId }
+  );
 }

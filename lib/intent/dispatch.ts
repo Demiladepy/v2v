@@ -11,7 +11,8 @@ import { routeFinancialIntent } from "@/lib/server/financial-router";
 
 async function dispatchCreateInvoice(
   intent: Extract<ParsedIntent, { intent_type: "CREATE_INVOICE" }>,
-  merchantId: string
+  merchantId: string,
+  idempotencyHeader?: string | null
 ): Promise<ActionResult> {
   const result = await routeFinancialIntent(
     {
@@ -20,7 +21,8 @@ async function dispatchCreateInvoice(
       amount: intent.amount,
       memo: intent.memo,
     },
-    merchantId
+    merchantId,
+    { idempotencyHeader }
   );
 
   return {
@@ -112,11 +114,16 @@ async function dispatchRunNegotiation(
 export async function dispatchIntent(
   parsed: ParsedIntent,
   merchantId: string,
-  transcript: string
+  transcript: string,
+  options?: { idempotencyHeader?: string | null }
 ): Promise<ActionResult> {
   switch (parsed.intent_type) {
     case "CREATE_INVOICE":
-      return dispatchCreateInvoice(parsed, merchantId);
+      return dispatchCreateInvoice(
+        parsed,
+        merchantId,
+        options?.idempotencyHeader
+      );
     case "CHECK_BALANCE":
       return dispatchCheckBalance(parsed, merchantId);
     case "RUN_NEGOTIATION":
