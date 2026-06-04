@@ -1,6 +1,6 @@
 # V2V ML Pipeline Service
 
-Quick start guide for the Precious ML pipeline service.
+Quick start guide for the ML pipeline service.
 
 ## Local Development
 
@@ -156,7 +156,6 @@ To use this ML service from the Next.js backend:
    npm run dev
    ```
 
-Now the Next.js app will use your real Groq LLM instead of the stub keyword parser!
 
 ---
 
@@ -198,11 +197,11 @@ Frontend (browser)
     ↓
 Next.js /api/voice/process
     ↓
-ML Service (Flask) ← YOU ARE HERE
+ML Service (Flask) ← 
     ├─ /transcribe → Aethex API (STT)
     └─ /parse-intent → Groq API (LLM)
     ↓
-Next.js /api/financial/router (Demilade)
+Next.js /api/financial/router 
     ↓
 Supabase (ledger)
 ```
@@ -253,12 +252,3 @@ FLASK_ENV=development                  # development or production
 - Flask-CORS is configured; should allow all origins in dev
 - For production, configure `CORS(app, origins=["https://yourdomain.com"])`
 
----
-
-## Next Steps
-
-1. ✅ Deploy this ML service
-2. Set `ML_INTENT_PARSER_URL` in Next.js .env.local
-3. Set `INTENT_PARSER_MODE=ml` in Next.js .env.local
-4. Restart Next.js dev server
-5. Test voice processing end-to-end!
