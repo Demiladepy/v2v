@@ -8,7 +8,6 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { BottomNav, NavTab } from "@/components/BottomNav";
 import { FinancialDashboard } from "@/components/FinancialDashboard";
 import { CafeOneUI } from "@/components/CafeOneUI";
-import { mockTranscribeAPI } from "@/lib/mockTranscribe";
 import { CheckoutModule } from "@/components/CheckoutModule";
 
 export default function Home() {
@@ -16,12 +15,14 @@ export default function Home() {
   const [transcript, setTranscript] = useState<string>("");
   const [activeTab, setActiveTab] = useState<NavTab>("HOME");
   const [intentData, setIntentData] = useState<LLMResponsePayload | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const { startRecording, stopRecording, error: micError } = useAudioRecorder();
 
   const handleStartRecording = async () => {
     // Reset previous intent state
     setIntentData(null);
+    setCheckoutUrl(null);
     setTranscript("");
 
     const started = await startRecording();
@@ -46,14 +47,46 @@ export default function Home() {
     setAppState("PARSING");
     
     try {
-      // Mock hitting the /api/transcribe endpoint
-      const result = await mockTranscribeAPI(blob);
+      // 1. Hit the real transcribe endpoint to get the parsed intent
+      const transcribeFormData = new FormData();
+      transcribeFormData.append("file", blob);
       
-      setIntentData(result);
+      const transcribeResponse = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: transcribeFormData,
+      });
+
+      const transcribeApiResult = await transcribeResponse.json();
+      if (!transcribeApiResult.ok) {
+        throw new Error(transcribeApiResult.error || "Failed to transcribe audio");
+      }
+      
+      const payload = transcribeApiResult.data;
+      
+      // 2. Hit the real backend API with the parsed intent
+      const response = await fetch('/api/financial/router', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const apiResult = await response.json();
+      
+      if (!apiResult.ok) {
+        throw new Error(apiResult.error || "Failed to process intent");
+      }
+      
+      const resultData = apiResult.data;
+
+      setIntentData(payload);
+      if (resultData.authorization_url) {
+        setCheckoutUrl(resultData.authorization_url);
+      }
+      
       setAppState("SUCCESS");
       
-      if (result.intent === "CREATE_INVOICE") {
-        setTranscript(`Invoice ${result.client} ₦${result.amount.toLocaleString()} for ${result.memo}.`);
+      if (payload.intent === "CREATE_INVOICE") {
+        setTranscript(`Invoice ${payload.client} ₦${payload.amount.toLocaleString()} for ${payload.memo}.`);
       } else {
         setTranscript("Intent parsed successfully.");
       }
@@ -133,8 +166,8 @@ export default function Home() {
               </Card>
 
               {/* Dynamically render Checkout Module if intent is CREATE_INVOICE */}
-              {appState === "SUCCESS" && intentData?.intent === "CREATE_INVOICE" && (
-                <CheckoutModule intent={intentData} />
+              {appState === "SUCCESS" && intentData?.intent === "CREATE_INVOICE" && checkoutUrl && (
+                <CheckoutModule intent={intentData} authorizationUrl={checkoutUrl} />
               )}
             </div>
 

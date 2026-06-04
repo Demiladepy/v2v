@@ -7,13 +7,13 @@ import { Send, FileText, CheckCircle2 } from "lucide-react";
 
 interface CheckoutModuleProps {
   intent: CreateInvoicePayload;
+  authorizationUrl: string;
 }
 
-export function CheckoutModule({ intent }: CheckoutModuleProps) {
+export function CheckoutModule({ intent, authorizationUrl }: CheckoutModuleProps) {
   const handleShare = async () => {
-    const dummyPaystackUrl = "https://paystack.com/pay/v2v-demo-xyz";
     await sharePaymentLink(
-      dummyPaystackUrl,
+      authorizationUrl,
       `Invoice for ${intent.client} - ${intent.memo}`
     );
   };
