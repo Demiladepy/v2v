@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -9,7 +10,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0F172A",
+  themeColor: "#FDFBF7",
 };
 
 export const metadata: Metadata = {
@@ -29,10 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-[100dvh] flex flex-col selection:bg-brand selection:text-white`}
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-dvh flex flex-col selection:bg-brand selection:text-white`}
       >
+        <ServiceWorkerRegistrar />
         {children}
       </body>
     </html>

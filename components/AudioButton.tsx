@@ -18,11 +18,11 @@ export function AudioButton({ state, onPressStart, onPressStop }: AudioButtonPro
   const isError = state === "ERROR";
 
   const getIcon = () => {
-    if (isRecording) return <Square className="w-10 h-10 text-white fill-white" />;
-    if (isProcessing) return <Loader2 className="w-10 h-10 text-white animate-spin" />;
-    if (isSuccess) return <Check className="w-10 h-10 text-white" strokeWidth={3} />;
-    if (isError) return <AlertCircle className="w-10 h-10 text-white" />;
-    return <Mic className="w-10 h-10 text-white" />;
+    if (isRecording) return <Square className="w-10 h-10 text-primary-foreground fill-primary-foreground" />;
+    if (isProcessing) return <Loader2 className="w-10 h-10 text-primary-foreground animate-spin" />;
+    if (isSuccess) return <Check className="w-10 h-10 text-primary-foreground" strokeWidth={3} />;
+    if (isError) return <AlertCircle className="w-10 h-10 text-primary-foreground" />;
+    return <Mic className="w-10 h-10 text-primary-foreground" />;
   };
 
   const getBgClass = () => {
@@ -56,7 +56,7 @@ export function AudioButton({ state, onPressStart, onPressStop }: AudioButtonPro
         onPointerUp={isRecording ? onPressStop : undefined}
         onPointerLeave={isRecording ? onPressStop : undefined}
         className={cn(
-          "relative z-10 flex items-center justify-center w-28 h-28 rounded-full shadow-[0_8px_32px_rgba(37,99,235,0.4)] transition-all duration-300 ease-out",
+          "relative z-10 flex items-center justify-center w-28 h-28 rounded-full shadow-sh-lg transition-all duration-300 ease-out",
           "active:scale-95 touch-none select-none",
           getBgClass()
         )}
