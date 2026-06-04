@@ -16,6 +16,6 @@ export async function POST(request: Request) {
     return badRequest(validated.error, validated.details);
   }
 
-  const result = routeFinancialIntent(validated.data);
+  const result = await routeFinancialIntent(validated.data);
   return created(result);
 }
