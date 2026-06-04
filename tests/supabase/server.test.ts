@@ -14,7 +14,7 @@ describe("getSupabaseServerClient", () => {
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     expect(() => getSupabaseServerClient()).toThrow(
-      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+      "Missing SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY."
     );
 
     process.env.SUPABASE_URL = originalUrl;

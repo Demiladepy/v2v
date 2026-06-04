@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# V2V — Voice-to-Value Autonomous Merchant Protocol
 
-## Getting Started
+Next.js PWA + API backend for voice-driven invoices, balance checks, and B2B negotiations (Paystack + Supabase).
 
-First, run the development server:
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in keys
+# Run supabase/migrations/*.sql in Supabase SQL editor
+npm run seed                 # optional demo data
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API routes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/health` | GET | Liveness |
+| `/api/financial/router` | POST | Direct LLM JSON intents |
+| `/api/voice/process` | POST | Transcript → intent → action |
+| `/api/webhooks/paystack` | POST | Verified settlement webhooks |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All responses use `{ ok, data | error }` and include `x-request-id`.
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev          # local Next.js
+npm test             # Vitest (unit + integration)
+npm run seed         # idempotent Supabase demo rows
+npm run smoke -- https://your-deployment.vercel.app
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy (Vercel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Import the GitHub repo in [Vercel](https://vercel.com/new).
+2. Set **Environment Variables** (Production + Preview):
 
-## Deploy on Vercel
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `SUPABASE_URL` | Yes | Project URL (server-side) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server only — never expose to client |
+| `SUPABASE_ANON_KEY` | Optional | Future client reads |
+| `PAYSTACK_SECRET_KEY` | Yes | `sk_test_…` or live secret |
+| `PAYSTACK_PUBLIC_KEY` | Yes | Checkout / client |
+| `APP_BASE_URL` | Yes | e.g. `https://v2v.vercel.app` |
+| `DEFAULT_MERCHANT_ID` | Optional | Defaults to `default_merchant` |
+| `INTENT_PARSER_MODE` | Optional | `stub` (default) or `ml` |
+| `ML_INTENT_PARSER_URL` | If `ml` | Precious ML parser endpoint |
+| `NEGOTIATION_AGENT_MODE` | Optional | `stub` or `ml` |
+| `ML_NEGOTIATION_AGENT_URL` | If `ml` | Negotiation agent endpoint |
+| `AETHANA_API_KEY` | Optional | Precious STT |
+| `OPENAI_API_KEY` | Optional | Whisper / LLM fallback |
+| `YARNGPT_API_KEY` | Optional | TTS |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Deploy. Confirm **`app/api/webhooks/paystack/route.ts`** stays on **Node.js runtime** (required for raw body + HMAC).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. In **Paystack Dashboard → Webhooks**, set:
+
+   ```
+   https://<your-vercel-domain>/api/webhooks/paystack
+   ```
+
+5. Run migrations on Supabase production DB (`0001_transactions.sql`, `0002_negotiations.sql`).
+
+6. Post-deploy smoke:
+
+   ```bash
+   npm run smoke -- https://<your-vercel-domain>
+   ```
+
+See **DEMO_RUNBOOK.md** for judge-facing demo steps.
+
+## Team docs
+
+- `init.md` — hackathon priorities
+- `AGENTS.md` — coding rules
+- `docs/demilade.md` — backend ownership
+- `docs/timeline-changes.md` — change log
+
+## Learn more
+
+- [Next.js Documentation](https://nextjs.org/docs)
