@@ -69,3 +69,13 @@ Append-only log of agent changes. Do not overwrite existing lines.
 - ML service runs on `http://localhost:5000` (or deployed URL)
 - Next.js calls `ML_INTENT_PARSER_URL` when `INTENT_PARSER_MODE=ml`
 - Existing `lib/intent/parser.ts` (mlIntentParser function) already handles the HTTP call; Precious just needed to wrap Python pipeline in Flask
+
+### June 5, 2025
+
+- Fixed `GROQ_KEY` → `GROQ_API_KEY` in `intent_pipeline.py` to align with team `.env.example`
+- Fixed `AETHEX_KEY` → `AETHANA_API_KEY` in `intent_pipeline.py` to align with team `.env.example`
+- Added Groq Whisper STT fallback to `transcribe_audio()` in `intent_pipeline.py` — pipeline now survives Aethex outages during demo, reuses existing `groq_client`
+- Created `tts_pipeline.py` — YarnGPT TTS integration, Femi voice, streams mp3 to `/tmp/response.mp3`
+- Updated `app.py` — added `POST /synthesize` endpoint, imports `tts_pipeline`
+- Updated `Dockerfile` — added `COPY tts_pipeline.py` so container doesn't crash on import
+- Updated `ml/README.md` — documented `/synthesize` endpoint, added `YARNGPT_API_KEY` to setup and Docker run examples, fixed env variable names throughout
