@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY intent_pipeline.py .
+COPY tts_pipeline.py .
 COPY app.py .
 
 # Expose port

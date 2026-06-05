@@ -13,6 +13,8 @@ pip install -r requirements.txt
 # Set environment variables
 export AETHEX_KEY="your-aethex-api-key"
 export GROQ_KEY="your-groq-api-key"
+export YARNGPT_API_KEY="your-yarngpt-api-key"
+export OPENAI_API_KEY="your-openai-api-key"  # Whisper fallback
 
 # Run Flask server
 python app.py
@@ -23,11 +25,13 @@ Server starts on `http://localhost:5000`
 ### API Endpoints
 
 #### 1. Health Check
+
 ```bash
 curl http://localhost:5000/health
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -39,12 +43,14 @@ Response:
 ```
 
 #### 2. Transcribe Audio (STT)
+
 ```bash
 curl -X POST http://localhost:5000/transcribe \
   -F "audio=@/path/to/audio.webm"
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -56,6 +62,7 @@ Response:
 ```
 
 #### 3. Parse Intent (LLM)
+
 ```bash
 curl -X POST http://localhost:5000/parse-intent \
   -H "Content-Type: application/json" \
@@ -63,6 +70,7 @@ curl -X POST http://localhost:5000/parse-intent \
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -80,6 +88,7 @@ Response:
 ```
 
 #### 4. Full Pipeline (Audio → Intent)
+
 ```bash
 curl -X POST http://localhost:5000/process-voice \
   -F "audio=@/path/to/audio.webm" \
@@ -87,6 +96,7 @@ curl -X POST http://localhost:5000/process-voice \
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -104,25 +114,44 @@ Response:
 }
 ```
 
+#### 5. Text-to-Speech (TTS)
+
+```bash
+curl -X POST http://localhost:5000/synthesize \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Invoice of 150,000 Naira has been created for Cafe One."}' \
+  --output response.mp3
+```
+
+Response:
+
+- Returns an `audio/mpeg` file directly (not JSON)
+- Save with `--output response.mp3`
+
 ---
 
 ## Docker Deployment
 
 ### Build Image
+
 ```bash
 docker build -t v2v-ml-pipeline:latest ml/
 ```
 
 ### Run Container
+
 ```bash
 docker run -it --rm \
   -p 5000:5000 \
   -e AETHEX_KEY="your-key" \
   -e GROQ_KEY="your-key" \
+  -e YARNGPT_API_KEY="your-key" \
+  -e OPENAI_API_KEY="your-key" \
   v2v-ml-pipeline:latest
 ```
 
 ### Using Docker Compose
+
 ```bash
 # Copy environment variables first
 cp .env.example .env.local
@@ -140,18 +169,21 @@ docker-compose up ml-pipeline
 To use this ML service from the Next.js backend:
 
 1. **Start the ML service:**
-   ```bash
-   python ml/app.py
-   ```
+
+```bash
+python ml/app.py
+```
 
 2. **Configure Next.js environment:**
-   ```bash
-   # .env.local
-   INTENT_PARSER_MODE=ml
-   ML_INTENT_PARSER_URL=http://localhost:5000/parse-intent
-   ```
+
+```bash
+# .env.local
+INTENT_PARSER_MODE=ml
+ML_INTENT_PARSER_URL=http://localhost:5000/parse-intent
+```
 
 3. **Restart Next.js:**
-   ```bash
-   npm run dev
-   ```
+
+```bash
+npm run dev
+```

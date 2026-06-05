@@ -1,11 +1,16 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+
 import os
 import json
 import requests
 from groq import Groq
 
 # Environment Variables
-AETHEX_KEY = os.getenv("AETHEX_KEY")
-GROQ_KEY = os.getenv("GROQ_KEY")
+AETHEX_KEY = os.getenv("AETHANA_API_KEY")
+GROQ_KEY = os.getenv("GROQ_API_KEY")
 
 BASE_URL = "https://api.aethexai.com/api/v1"
 
