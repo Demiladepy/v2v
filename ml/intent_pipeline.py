@@ -81,6 +81,8 @@ Rules:
 - Return ONLY JSON
 - No explanation
 - No markdown
+- "wan collect", "dey ask", "wan charge" = negotiation signals → RUN_NEGOTIATION
+- "oga [name]" = counterparty name, strip "oga" prefix
 """,
             },
             {
