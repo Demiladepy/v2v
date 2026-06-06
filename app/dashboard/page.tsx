@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AppState, LLMResponsePayload } from "@/types";
+import { AppState, InvoiceLanguage, LLMResponsePayload } from "@/types";
 import { AudioButton } from "@/components/AudioButton";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { BottomNav, NavTab } from "@/components/BottomNav";
@@ -9,6 +9,7 @@ import { FinancialDashboard } from "@/components/FinancialDashboard";
 import { CafeOneUI } from "@/components/CafeOneUI";
 import { ProfileUI } from "@/components/ProfileUI";
 import { CheckoutModule } from "@/components/CheckoutModule";
+import { InvoiceLanguagePicker } from "@/components/InvoiceLanguagePicker";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [intentData, setIntentData] = useState<LLMResponsePayload | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [invoiceLanguage, setInvoiceLanguage] = useState<InvoiceLanguage>("english");
 
   // Background floating orbs variants
   const floatVariants: Variants = {
@@ -62,6 +64,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append("file", blob, "recording.webm");
+      formData.append("language", invoiceLanguage);
 
       const res = await fetch("/api/transcribe", {
         method: "POST",
@@ -69,19 +72,36 @@ export default function Home() {
       });
 
       const transcribeApiResult = await res.json();
-      if (!transcribeApiResult.ok) throw new Error("Transcription failed");
+      if (!transcribeApiResult.ok) {
+        throw new Error(transcribeApiResult.error || "Transcription failed");
+      }
 
-      const payload = transcribeApiResult.data as LLMResponsePayload;
+      const parsed = transcribeApiResult.data as LLMResponsePayload;
+      const payload: LLMResponsePayload =
+        parsed.intent === "CREATE_INVOICE"
+          ? { ...parsed, language: invoiceLanguage }
+          : parsed;
+
       setIntentData(payload);
-      
+
+      const idempotencyKey =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+
       const routerRes = await fetch("/api/financial/router", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
+        body: JSON.stringify(payload),
       });
 
       const apiResult = await routerRes.json();
-      if (!apiResult.ok) throw new Error("Processing failed");
+      if (!apiResult.ok) {
+        throw new Error(apiResult.error || "Processing failed");
+      }
 
       const resultData = apiResult.data;
       if (resultData.authorization_url) {
@@ -138,6 +158,14 @@ export default function Home() {
               </div>
 
               {/* Contextual Suggestions */}
+              <div className="mb-8">
+                <InvoiceLanguagePicker
+                  value={invoiceLanguage}
+                  onChange={setInvoiceLanguage}
+                  disabled={appState !== "IDLE" && appState !== "ERROR"}
+                />
+              </div>
+
               <div className="flex flex-wrap justify-center gap-2 mb-12 max-w-sm">
                 <span className="px-3 py-1.5 bg-brand/10 text-brand text-xs font-semibold rounded-full border border-brand/20">
                   "Invoice John for ₦15,000"
@@ -169,7 +197,7 @@ export default function Home() {
                       {appState === "UPLOADING" && "Uploading audio..."}
                       {appState === "PARSING" && "Extracting intent..."}
                       {appState === "SUCCESS" && "Transaction successful"}
-                      {appState === "ERROR" && "Processing failed. Try again."}
+                      {appState === "ERROR" && (actionError ?? "Processing failed. Try again.")}
                     </p>
                   </motion.div>
                 )}

@@ -47,6 +47,7 @@ async function executeCreateInvoice(
       client: payload.client,
       memo: payload.memo,
       amount_ngn: payload.amount,
+      language: payload.language ?? "english",
     },
   });
 
@@ -58,6 +59,7 @@ async function executeCreateInvoice(
       client: payload.client,
       memo: payload.memo,
       merchant_id: merchantId,
+      language: payload.language ?? "english",
     },
     callbackUrl: getPaymentCallbackUrl(),
   });
@@ -78,23 +80,24 @@ export async function routeFinancialIntent(
 ): Promise<FinancialRouterResult> {
   switch (payload.intent) {
     case "CREATE_INVOICE": {
-      const fallbackKey = buildIdempotencyKey("create-invoice", {
-        merchantId,
-        client: payload.client,
-        amount: payload.amount,
-        memo: payload.memo,
-      });
-      const idempotencyKey = resolveIdempotencyKey(
-        options?.idempotencyHeader ?? null,
-        fallbackKey
-      );
+      const idempotencyHeader = options?.idempotencyHeader?.trim();
 
-      const { body } = await withIdempotency(idempotencyKey, async () => ({
-        status: 201,
-        body: await executeCreateInvoice(payload, merchantId),
-      }));
+      // Only dedupe explicit retries (header). Same voice wording must still create new invoices.
+      if (idempotencyHeader) {
+        const idempotencyKey = resolveIdempotencyKey(
+          idempotencyHeader,
+          buildIdempotencyKey("create-invoice", { merchantId, key: idempotencyHeader })
+        );
 
-      return body;
+        const { body } = await withIdempotency(idempotencyKey, async () => ({
+          status: 201,
+          body: await executeCreateInvoice(payload, merchantId),
+        }));
+
+        return body;
+      }
+
+      return executeCreateInvoice(payload, merchantId);
     }
     case "CHECK_BALANCE": {
       const balance = await getBalance(merchantId);

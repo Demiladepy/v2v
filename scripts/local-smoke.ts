@@ -42,19 +42,27 @@ async function main() {
   );
 
   results.push(
-    await runStep("POST /api/transcribe (mock fallback)", async () => {
+    await runStep("POST /api/transcribe", async () => {
       const blob = new Blob(["fake-audio"], { type: "audio/webm" });
       const form = new FormData();
       form.append("file", blob, "test.webm");
+      form.append("language", "english");
 
       const res = await fetch(`${localBaseUrl}/api/transcribe`, {
         method: "POST",
         body: form,
       });
       const body = await res.json();
+      const configured = res.ok && body.ok === true;
+      const clearConfigError =
+        res.status === 503 &&
+        typeof body.error === "string" &&
+        body.error.includes("Voice transcription is not configured");
       return {
-        ok: res.ok && body.ok === true && body.data?.intent === "CREATE_INVOICE",
-        detail: `${res.status} intent=${body.data?.intent ?? body.error}`,
+        ok: configured || clearConfigError,
+        detail: configured
+          ? `${res.status} intent=${body.data?.intent}`
+          : `${res.status} ${body.error ?? "unknown"}`,
       };
     })
   );
@@ -90,15 +98,23 @@ async function main() {
       const form = new FormData();
       form.append("file", blob, "test.webm");
 
+      form.append("language", "english");
+
       const transcribeRes = await fetch(`${localBaseUrl}/api/transcribe`, {
         method: "POST",
         body: form,
       });
       const transcribeBody = await transcribeRes.json();
       if (!transcribeBody.ok) {
+        const skipped =
+          transcribeRes.status === 503 &&
+          typeof transcribeBody.error === "string" &&
+          transcribeBody.error.includes("Voice transcription is not configured");
         return {
-          ok: false,
-          detail: `transcribe failed: ${transcribeBody.error}`,
+          ok: skipped,
+          detail: skipped
+            ? "skipped — transcription keys not configured locally"
+            : `transcribe failed: ${transcribeBody.error}`,
         };
       }
 

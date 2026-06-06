@@ -1,17 +1,25 @@
 import { ok, badRequest, jsonResponse } from "@/lib/api/response";
-import { CreateInvoicePayload, LLMResponsePayload } from "@/types";
+import type { LLMResponsePayload } from "@/types";
+import {
+  getSttLanguageCode,
+  isInvoiceLanguage,
+} from "@/lib/constants/invoice-languages";
 
-const MOCK_INTENT: CreateInvoicePayload = {
-  intent: "CREATE_INVOICE",
-  client: "Cafe One",
-  amount: 15000,
-  memo: "Late night coffee supply",
-};
+const GROQ_MODEL = "llama-3.1-8b-instant";
+
+function resolveTranscribeLanguage(value: FormDataEntryValue | null): string {
+  if (typeof value === "string" && isInvoiceLanguage(value)) {
+    return getSttLanguageCode(value);
+  }
+
+  return "english";
+}
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as Blob | null;
+    const sttLanguage = resolveTranscribeLanguage(formData.get("language"));
 
     if (!file) {
       return badRequest("Audio file is missing");
@@ -20,18 +28,17 @@ export async function POST(request: Request) {
     const AETHANA_KEY = process.env.AETHANA_API_KEY;
     const GROQ_KEY = process.env.GROQ_API_KEY;
 
-    // Graceful fallback for missing keys during dev/hackathon
     if (!AETHANA_KEY || !GROQ_KEY) {
-      console.warn("Missing AETHANA_API_KEY or GROQ_API_KEY. Using mock intent fallback.");
-      // Simulate latency
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      return ok(MOCK_INTENT);
+      return jsonResponse(503, {
+        ok: false,
+        error:
+          "Voice transcription is not configured. Set AETHANA_API_KEY and GROQ_API_KEY on the server.",
+      });
     }
 
-    // Step 1: Transcribe audio using Aethana AI
     const transcribeFormData = new FormData();
     transcribeFormData.append("file", file);
-    transcribeFormData.append("language", "english");
+    transcribeFormData.append("language", sttLanguage);
 
     const transcribeRes = await fetch("https://api.aethexai.com/api/v1/transcribe", {
       method: "POST",
@@ -53,15 +60,14 @@ export async function POST(request: Request) {
       throw new Error("No text returned from transcription service");
     }
 
-    // Step 2: Parse intent using Groq LLM
     const llmRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_KEY}`,
+        Authorization: `Bearer ${GROQ_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192", // Using a fast, standard Groq model instead of the placeholder
+        model: GROQ_MODEL,
         messages: [
           {
             role: "system",
@@ -74,6 +80,7 @@ Given a voice transcript, return ONLY valid JSON matching one of these:
 
 Rules:
 - amount must be a number. ₦150,000 = 150000, "fifty thousand" = 50000
+- Extract client, amount, and memo from the transcript — never reuse example values
 - Return ONLY the JSON. No explanation, no extra text.`,
           },
           {
@@ -92,18 +99,19 @@ Rules:
 
     const llmData = await llmRes.json();
     const content = llmData.choices?.[0]?.message?.content;
-    
+
     if (!content) {
       throw new Error("Empty response from Groq LLM");
     }
 
-    // Attempt to parse JSON. Sometimes LLMs output markdown fences like ```json
     const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
     const parsedIntent = JSON.parse(cleanContent) as LLMResponsePayload;
 
     return ok(parsedIntent);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Transcribe API Error:", error);
-    return badRequest(error.message || "Failed to process audio");
+    const message =
+      error instanceof Error ? error.message : "Failed to process audio";
+    return badRequest(message);
   }
 }
