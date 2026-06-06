@@ -163,7 +163,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute bottom-40 left-0 right-0 text-center px-4"
+                    className="mt-8 text-center px-4 h-12 flex items-center justify-center"
                   >
                     <p className="text-sm font-semibold text-muted-foreground font-sans bg-card/80 backdrop-blur-md py-2 px-4 rounded-full inline-block shadow-sm border border-border/50">
                       {appState === "UPLOADING" && "Uploading audio..."}
