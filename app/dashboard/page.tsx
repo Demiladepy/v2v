@@ -16,6 +16,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("HOME");
   const [intentData, setIntentData] = useState<LLMResponsePayload | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { startRecording, stopRecording, error: micError } = useAudioRecorder();
 
@@ -24,6 +25,7 @@ export default function Home() {
     setIntentData(null);
     setCheckoutUrl(null);
     setTranscript("");
+    setActionError(null);
 
     const started = await startRecording();
     if (!started) {
@@ -40,6 +42,7 @@ export default function Home() {
     const blob = await stopRecording();
 
     if (!blob) {
+      setActionError("No audio captured. Hold the button longer while speaking.");
       setAppState("ERROR");
       return;
     }
@@ -95,6 +98,9 @@ export default function Home() {
       
     } catch (err) {
       console.error(err);
+      setActionError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      );
       setAppState("ERROR");
     }
   };
@@ -158,7 +164,7 @@ export default function Home() {
                     {appState === "ERROR" && (
                       <div className="text-destructive text-sm font-medium border border-destructive/30 bg-destructive/10 p-4 rounded-xl w-full shadow-sm">
                         <div className="text-xs text-destructive/70 uppercase tracking-wider mb-1 font-semibold">Error</div>
-                        {micError ?? "Something went wrong. Please try again."}
+                        {micError ?? actionError ?? "Something went wrong. Please try again."}
                       </div>
                     )}
                   </div>
@@ -185,6 +191,7 @@ export default function Home() {
                   onClick={() => {
                     setAppState("IDLE");
                     setIntentData(null);
+                    setActionError(null);
                   }}
                   className="mt-3 text-xs text-brand underline underline-offset-2"
                 >

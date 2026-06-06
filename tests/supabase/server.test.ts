@@ -14,7 +14,7 @@ describe("getSupabaseServerClient", () => {
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     expect(() => getSupabaseServerClient()).toThrow(
-      "Missing SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY."
+      "Database is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
     );
 
     process.env.SUPABASE_URL = originalUrl;
