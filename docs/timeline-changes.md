@@ -78,6 +78,39 @@ Append-only log of agent changes. Do not overwrite existing lines.
 - **Created** `ml/README.md` — Comprehensive deployment guide: local dev setup, curl examples for all endpoints, Docker build/run, docker-compose, production deployment (Railway/Render/Cloud Run), troubleshooting, environment variables.
 
 ### Integration with Next.js
-- ML service runs on `http://localhost:5000` (or deployed URL)
-- Next.js calls `ML_INTENT_PARSER_URL` when `INTENT_PARSER_MODE=ml`
 - Existing `lib/intent/parser.ts` (mlIntentParser function) already handles the HTTP call; Precious just needed to wrap Python pipeline in Flask
+
+## 2026-06-06 — Antigravity (Agent) — UI Upgrade
+- **Installed** `framer-motion` for fluid tab transitions and audio-reactive visuals.
+- **Updated** `app/globals.css` with dark mode variables (`.dark`) and glassmorphism tokens.
+- **Updated** `app/layout.tsx` to include `next-themes` ThemeProvider and `Playfair Display` font.
+- **Redesigned** `components/BottomNav.tsx` as a floating glassmorphic dock with active tab animations.
+- **Redesigned** `components/AudioButton.tsx` with dynamic pulsing and processing animations using framer-motion.
+- **Redesigned** `components/FinancialDashboard.tsx` and `components/CafeOneUI.tsx` with borderless glass cards, hover effects, and staggered entry animations.
+- **Updated** `app/dashboard/page.tsx` with `AnimatePresence` for smooth tab transitions.
+
+## 2026-06-06 — Antigravity (Agent) — App-Wide UI Revamp
+- **Removed** `next-themes` and `ThemeProvider` to resolve hydration mismatches and background blinking. Locked app into a strict, clean light mode.
+- **Created** `app/login/page.tsx` to establish a mocked user authentication flow.
+- **Rebuilt** `app/page.tsx` into a comprehensive marketing landing page detailing features, integrations, and social proof.
+- **Updated** `app/dashboard/page.tsx` to include an authenticated user session header.
+- **Refactored** `components/FinancialDashboard.tsx` and `components/CafeOneUI.tsx` to use correct typography hierarchy (`Inter` for data, `Playfair Display` for headers) and eliminated infinite loading bugs.
+
+## 2026-06-06 — Antigravity (Agent) — Final UI Corrections
+- **Created** `components/ProfileUI.tsx` containing the user identity, settings stub, and logout action.
+- **Updated** `components/BottomNav.tsx` to include a 4th `PROFILE` tab.
+- **Updated** `app/dashboard/page.tsx` to integrate the `PROFILE` tab dynamically, removed the globally stuck headers, and added floating glassmorphic background elements.
+- **Redesigned** `components/AudioButton.tsx` to replace the red ping animation with an elegant waveform visualizer when recording.
+- **Redesigned** `app/page.tsx` to feature a highly premium layout with deep velvet contrasts and overlapping glass panels.
+
+## 2026-06-06 — Antigravity (Agent) — Dashboard Refinements
+- **Updated** `components/ProfileUI.tsx` to simplify the sign-out action text.
+- **Updated** `components/FinancialDashboard.tsx` to replace generic loading spinners with premium UI skeleton loading states.
+- **Updated** `app/dashboard/page.tsx` to include contextual "Suggested Commands" within the Voice tab.
+
+## 2026-06-06 — Antigravity (Agent) — Landing Page Overhaul
+- **Rewrote** `app/page.tsx` completely to implement a high-end, asymmetric, interactive marketing page.
+- **Added** a responsive Global Header with a mobile menu overlay.
+- **Added** a `position: sticky` split-screen scrolling section for "How It Works".
+- **Added** an asymmetric Bento Box grid for Core Features and an interactive expanding accordion for Use Cases.
+- **Added** an infinite scrolling marquee for Enterprise Integrations.
