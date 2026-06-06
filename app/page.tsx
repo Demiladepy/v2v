@@ -96,7 +96,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <main className="flex-1 flex flex-col bg-[var(--cream-bg)] min-h-dvh font-sans w-full overflow-x-hidden relative text-foreground">
+    <main className="flex-1 flex flex-col bg-[var(--cream-bg)] min-h-dvh font-sans w-full overflow-clip relative text-foreground">
       {/* 1. Global Header */}
       <header className="sticky top-0 z-50 w-full bg-[var(--cream-bg)]/80 backdrop-blur-md border-b border-border/40">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
