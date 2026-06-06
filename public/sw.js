@@ -1,4 +1,4 @@
-const CACHE_NAME = "v2v-shell-v1";
+const CACHE_NAME = "v2v-shell-v2";
 const SHELL_ASSETS = ["/", "/manifest.json", "/icon.svg"];
 
 self.addEventListener("install", (e) => {
@@ -34,8 +34,24 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Cache-first for everything else (app shell, static assets)
+  const isDocument =
+    e.request.mode === "navigate" ||
+    (e.request.headers.get("accept") || "").includes("text/html");
+
+  // Network-first for pages so deploys and API-backed views stay fresh.
+  if (isDocument) {
+    e.respondWith(
+      fetch(e.request).catch(() =>
+        caches.match(e.request).then((cached) => cached ?? caches.match("/"))
+      )
+    );
+    return;
+  }
+
+  // Cache-first for static assets
   e.respondWith(
-    caches.match(e.request).then((cached) => cached ?? fetch(e.request))
+    caches
+      .match(e.request)
+      .then((cached) => cached ?? fetch(e.request).catch(() => cached))
   );
 });
