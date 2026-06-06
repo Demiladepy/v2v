@@ -2,14 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-serif);
   
   --color-ring: var(--ring);
   --color-input: var(--input);
@@ -46,14 +44,14 @@
 }
 
 :root {
-  /* ── V2V Velvet Palette ──────────── */
+  /* ── V2V Velvet Palette (Light Mode Only) ──────────── */
   --cream-bg: #FDFBF7;
   --velvet-primary: #7A1F2D;
   --velvet-light: #A33A4A;
   --velvet-dark: #4A1019;
   
   --black-base: #121212;
-  --black-muted: #404040;
+  --black-muted: #525252;
   --black-faint: #E5E5E5;
 
   --pure-white: #FFFFFF;
@@ -76,7 +74,7 @@
   --brand-dark: var(--velvet-dark);
   --success: var(--success-color);
   --warning: var(--warning-color);
-  --info: #000000;
+  --info: var(--black-base); /* Info used for text highlights */
 
   /* ── shadcn semantic vars ─── */
   --background: var(--cream-bg);
@@ -89,7 +87,7 @@
   --popover-foreground: var(--black-base);
   
   --primary: var(--velvet-primary);
-  --primary-foreground: var(--cream-bg);
+  --primary-foreground: var(--pure-white);
   
   --secondary: var(--black-faint);
   --secondary-foreground: var(--black-base);
@@ -98,7 +96,7 @@
   --muted-foreground: var(--black-muted);
   
   --accent: var(--velvet-light);
-  --accent-foreground: var(--cream-bg);
+  --accent-foreground: var(--pure-white);
   
   --destructive: var(--destructive-color);
   --destructive-foreground: var(--pure-white);
@@ -106,6 +104,10 @@
   --border: var(--black-faint);
   --input: var(--black-faint);
   --ring: var(--velvet-primary);
+  
+  /* Glassmorphism tuned for light mode */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
 }
 
 @layer base {
@@ -119,5 +121,9 @@
 
   html {
     @apply font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
   }
 }
