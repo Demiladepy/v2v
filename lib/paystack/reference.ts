@@ -8,10 +8,16 @@ export function invoiceEmailFromClient(client: string): string {
   const slug = client
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/^\.+|\.+$/g, "");
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
 
-  return `${slug || "customer"}@v2v.local`;
+  // Paystack rejects .local addresses — use a normal-looking checkout email.
+  const localPart = slug || "customer";
+  const domain =
+    process.env.PAYSTACK_CHECKOUT_EMAIL_DOMAIN?.trim() || "checkout.v2vprotocol.com";
+
+  return `${localPart}@${domain}`;
 }
 
 export function getPaymentCallbackUrl(): string {
