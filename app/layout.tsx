@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,9 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <body
-        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-dvh flex flex-col selection:bg-brand selection:text-white`}
+        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground min-h-dvh flex flex-col selection:bg-brand selection:text-white`}
       >
         <ServiceWorkerRegistrar />
         {children}
