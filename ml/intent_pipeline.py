@@ -1,42 +1,56 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import json
 import requests
 from groq import Groq
 
 # Environment Variables
-AETHEX_KEY = os.getenv("AETHEX_KEY")
-GROQ_KEY = os.getenv("GROQ_KEY")
+AETHEX_KEY = os.getenv("AETHANA_API_KEY")
+GROQ_KEY = os.getenv("GROQ_API_KEY")
 
 BASE_URL = "https://api.aethexai.com/api/v1"
 
 if not AETHEX_KEY:
-    raise ValueError("AETHEX_KEY environment variable is not set")
+    raise ValueError("AETHEX_API_KEY environment variable is not set")
 
 if not GROQ_KEY:
-    raise ValueError("GROQ_KEY environment variable is not set")
+    raise ValueError("GROQ_API_KEY environment variable is not set")
 
 groq_client = Groq(api_key=GROQ_KEY)
 
 
 def transcribe_audio(file_path: str) -> str:
     """
-    Convert speech audio to text using AETHEX STT.
+    Convert speech audio to text using Aethex STT.
+    Falls back to Groq Whisper if Aethex fails.
     """
+    # Primary: Aethex STT
+    try:
+        with open(file_path, "rb") as audio_file:
+            response = requests.post(
+                f"{BASE_URL}/transcribe",
+                headers={"X-API-Key": AETHEX_KEY},
+                files={"file": audio_file},
+                data={"language": "english"},
+                timeout=30,
+            )
+        response.raise_for_status()
+        result = response.json()
+        return result["text"]
 
+    except Exception as aethex_error:
+        print(f"[WARNING] Aethex STT failed: {aethex_error}. Falling back to Groq Whisper.")
+
+    # Fallback: Groq Whisper
     with open(file_path, "rb") as audio_file:
-        response = requests.post(
-            f"{BASE_URL}/transcribe",
-            headers={"X-API-Key": AETHEX_KEY},
-            files={"file": audio_file},
-            data={"language": "english"},
-            timeout=30,
+        transcription = groq_client.audio.transcriptions.create(
+            file=(file_path, audio_file.read()),
+            model="whisper-large-v3-turbo",
+            language="en",
         )
 
-    response.raise_for_status()
-
-    result = response.json()
-
-    return result["text"]
+    return transcription.text
 
 
 def parse_intent(transcript_text: str) -> dict:
@@ -67,6 +81,8 @@ Rules:
 - Return ONLY JSON
 - No explanation
 - No markdown
+- "wan collect", "dey ask", "wan charge" = negotiation signals → RUN_NEGOTIATION
+- "oga [name]" = counterparty name, strip "oga" prefix
 """,
             },
             {
