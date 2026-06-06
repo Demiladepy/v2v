@@ -4,6 +4,7 @@
 // ==========================================
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "@/lib/api/errors";
 
 function assertServerOnly(): void {
   if (typeof window !== "undefined") {
@@ -28,8 +29,9 @@ export function getSupabaseServerClient(): SupabaseClient {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceRoleKey) {
-    throw new Error(
-      "Missing SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY."
+    throw new AppError(
+      503,
+      "Database is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
     );
   }
 

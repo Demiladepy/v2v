@@ -16,6 +16,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("HOME");
   const [intentData, setIntentData] = useState<LLMResponsePayload | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Background floating orbs variants
   const floatVariants: Variants = {
@@ -36,7 +37,7 @@ export default function Home() {
   const handleStartRecording = async () => {
     setIntentData(null);
     setCheckoutUrl(null);
-    
+    setActionError(null);
     const started = await startRecording();
     if (!started) {
       setAppState("ERROR");
@@ -51,6 +52,7 @@ export default function Home() {
     const blob = await stopRecording();
 
     if (!blob) {
+      setActionError("No audio captured. Hold the button longer while speaking.");
       setAppState("ERROR");
       return;
     }
@@ -93,6 +95,9 @@ export default function Home() {
       }
     } catch (err) {
       console.error(err);
+      setActionError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      );
       setAppState("ERROR");
     } finally {
       setTimeout(() => setAppState("IDLE"), 2500);
