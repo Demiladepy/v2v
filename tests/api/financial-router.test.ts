@@ -44,14 +44,35 @@ describe("routeFinancialIntent", () => {
       client: "Cafe One",
       amount: 150000,
       memo: "Coffee supplies",
+      language: "yoruba",
     });
 
     expect(result.accepted).toBe(true);
     expect(result.intent).toBe("CREATE_INVOICE");
     expect(createTransaction).toHaveBeenCalledOnce();
+    expect(createTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({ language: "yoruba" }),
+      })
+    );
     expect(initializeTransaction).toHaveBeenCalledOnce();
     expect(result.authorization_url).toBe("https://checkout.paystack.com/test");
     expect(result.reference).toBe("v2v_mock_ref");
+  });
+
+  it("creates a new invoice for each call when no idempotency header is sent", async () => {
+    const payload = {
+      intent: "CREATE_INVOICE" as const,
+      client: "Cafe One",
+      amount: 150000,
+      memo: "Coffee supplies",
+    };
+
+    await routeFinancialIntent(payload);
+    await routeFinancialIntent(payload);
+
+    expect(createTransaction).toHaveBeenCalledTimes(2);
+    expect(initializeTransaction).toHaveBeenCalledTimes(2);
   });
 
   it("reads real balance for CHECK_BALANCE intents", async () => {

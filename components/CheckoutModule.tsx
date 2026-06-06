@@ -2,6 +2,7 @@
 
 import { CreateInvoicePayload } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getInvoiceLanguageLabel } from "@/lib/constants/invoice-languages";
 import { sharePaymentLink } from "@/lib/share";
 import { Send, FileText, CheckCircle2 } from "lucide-react";
 
@@ -11,10 +12,12 @@ interface CheckoutModuleProps {
 }
 
 export function CheckoutModule({ intent, authorizationUrl }: CheckoutModuleProps) {
+  const languageLabel = getInvoiceLanguageLabel(intent.language ?? "english");
+
   const handleShare = async () => {
     await sharePaymentLink(
       authorizationUrl,
-      `Invoice for ${intent.client} - ${intent.memo}`
+      `Invoice for ${intent.client} - ${intent.memo} (${languageLabel})`
     );
   };
 
@@ -50,9 +53,13 @@ export function CheckoutModule({ intent, authorizationUrl }: CheckoutModuleProps
               <span className="text-sm font-medium text-muted-foreground">Amount</span>
               <span className="font-bold text-lg text-brand">{formatCurrency(intent.amount)}</span>
             </div>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-2">
               <span className="text-sm font-medium text-muted-foreground">Memo</span>
               <span className="text-sm text-foreground text-right">{intent.memo}</span>
+            </div>
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Language</span>
+              <span className="text-sm text-foreground text-right">{languageLabel}</span>
             </div>
           </div>
 
