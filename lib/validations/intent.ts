@@ -11,7 +11,7 @@ const createInvoiceSchema = z.object({
   client: z.string().trim().min(1, "client is required"),
   amount: z.number().positive("amount must be greater than zero"),
   memo: z.string().trim().min(1, "memo is required"),
-  language: z.enum(["english", "yoruba", "pidgin"]).optional(),
+  language: z.enum(["english", "yoruba", "pidgin", "arabic"]).optional(),
 });
 
 const checkBalanceSchema = z.object({

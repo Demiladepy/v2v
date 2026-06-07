@@ -5,7 +5,7 @@
 
 export type IntentType = "CREATE_INVOICE" | "CHECK_BALANCE" | "RUN_NEGOTIATION" | "UNKNOWN";
 
-export type InvoiceLanguage = "english" | "yoruba" | "pidgin";
+export type InvoiceLanguage = "english" | "yoruba" | "pidgin" | "arabic";
 
 export interface CreateInvoicePayload {
   intent: "CREATE_INVOICE";

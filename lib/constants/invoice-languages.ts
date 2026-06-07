@@ -2,6 +2,8 @@ export const INVOICE_LANGUAGES = [
   { id: "english", label: "English", sttCode: "english" },
   { id: "yoruba", label: "Yoruba", sttCode: "yoruba" },
   { id: "pidgin", label: "Pidgin", sttCode: "pidgin" },
+  // Aethex transcribe language hint — https://developers.aethexai.com/docs/api-reference/transcription
+  { id: "arabic", label: "Arabic", sttCode: "arabic" },
 ] as const;
 
 export type InvoiceLanguage = (typeof INVOICE_LANGUAGES)[number]["id"];
