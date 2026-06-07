@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLedger } from "@/hooks/useLedger";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
 export function FinancialDashboard({ refreshTrigger = 0 }: { refreshTrigger?: number }) {
-  const { entries, balance, isLoading, refresh } = useLedger();
+  const { entries, balance, isLoading, error, refresh } = useLedger();
+  const lastRefreshTrigger = useRef(0);
 
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > lastRefreshTrigger.current) {
+      lastRefreshTrigger.current = refreshTrigger;
       refresh();
     }
   }, [refreshTrigger, refresh]);
@@ -70,7 +72,11 @@ export function FinancialDashboard({ refreshTrigger = 0 }: { refreshTrigger?: nu
         </div>
         
         <div className="pt-2">
-          {isLoading ? (
+          {error && !isLoading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground font-sans px-4">
+              {error}
+            </div>
+          ) : isLoading ? (
             <div className="flex flex-col gap-2">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-transparent">

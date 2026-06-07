@@ -1,4 +1,4 @@
-const CACHE_NAME = "v2v-shell-v2";
+const CACHE_NAME = "v2v-shell-v3";
 const SHELL_ASSETS = ["/", "/manifest.json", "/icon.svg"];
 
 self.addEventListener("install", (e) => {
@@ -22,11 +22,11 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
 
-  // Network-first for API routes; offline returns a JSON error
   if (new URL(e.request.url).pathname.startsWith("/api/")) {
     e.respondWith(
       fetch(e.request).catch(() =>
-        new Response(JSON.stringify({ error: "offline" }), {
+        new Response(JSON.stringify({ ok: false, error: "offline" }), {
+          status: 503,
           headers: { "Content-Type": "application/json" },
         })
       )
@@ -38,20 +38,28 @@ self.addEventListener("fetch", (e) => {
     e.request.mode === "navigate" ||
     (e.request.headers.get("accept") || "").includes("text/html");
 
-  // Network-first for pages so deploys and API-backed views stay fresh.
   if (isDocument) {
     e.respondWith(
       fetch(e.request).catch(() =>
-        caches.match(e.request).then((cached) => cached ?? caches.match("/"))
+        caches.match(e.request).then((cached) => {
+          if (cached) return cached;
+          return caches.match("/");
+        })
       )
     );
     return;
   }
 
-  // Cache-first for static assets
   e.respondWith(
-    caches
-      .match(e.request)
-      .then((cached) => cached ?? fetch(e.request).catch(() => cached))
+    caches.match(e.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(e.request).catch(
+        () =>
+          new Response("", {
+            status: 503,
+            statusText: "Offline",
+          })
+      );
+    })
   );
 });
