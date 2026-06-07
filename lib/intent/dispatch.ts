@@ -20,6 +20,7 @@ async function dispatchCreateInvoice(
       client: intent.client,
       amount: intent.amount,
       memo: intent.memo,
+      language: intent.language,
     },
     merchantId,
     { idempotencyHeader }

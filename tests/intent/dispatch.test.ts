@@ -91,6 +91,29 @@ describe("dispatchIntent", () => {
     }
   });
 
+  it("forwards invoice language to routeFinancialIntent", async () => {
+    await dispatchIntent(
+      {
+        intent_type: "CREATE_INVOICE",
+        client: "John",
+        amount: 15000,
+        memo: "Design work",
+        language: "pidgin",
+      },
+      "default_merchant",
+      "Invoice John"
+    );
+
+    expect(routeFinancialIntent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        intent: "CREATE_INVOICE",
+        language: "pidgin",
+      }),
+      "default_merchant",
+      expect.any(Object)
+    );
+  });
+
   it("calls getBalance for CHECK_BALANCE", async () => {
     const result = await dispatchIntent(
       {

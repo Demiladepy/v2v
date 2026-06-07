@@ -2,6 +2,7 @@ import { ok, badRequest } from "@/lib/api/response";
 import { handleRoute } from "@/lib/api/handle-route";
 import { mapErrorToResponse } from "@/lib/api/errors";
 import { dispatchIntent } from "@/lib/intent/dispatch";
+import { validateLlmToParsed } from "@/lib/intent/llm-to-parsed";
 import { parseTranscript } from "@/lib/intent/parser";
 import { getDefaultMerchantId } from "@/lib/server/merchant";
 import { parseJsonBody } from "@/lib/server/parse-json-body";
@@ -31,7 +32,23 @@ export async function POST(request: Request) {
       ctx.merchantId = resolvedMerchant;
 
       try {
-        const parsed = await parseTranscript(validated.data.transcript);
+        const parsed = validated.data.parsed_intent
+          ? (() => {
+              const mapped = validateLlmToParsed(
+                validated.data.parsed_intent,
+                validated.data.language
+              );
+              if (!mapped.success) {
+                throw {
+                  code: "INVALID_PARSER_OUTPUT",
+                  message: mapped.error,
+                  details: mapped.details,
+                };
+              }
+              return mapped.data;
+            })()
+          : await parseTranscript(validated.data.transcript);
+
         const result = await dispatchIntent(
           parsed,
           resolvedMerchant,

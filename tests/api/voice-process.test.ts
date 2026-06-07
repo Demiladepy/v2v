@@ -82,4 +82,45 @@ describe("POST /api/voice/process", () => {
     expect(body.ok).toBe(false);
     expect(dispatchIntent).not.toHaveBeenCalled();
   });
+
+  it("uses parsed_intent when provided and skips parseTranscript", async () => {
+    vi.mocked(dispatchIntent).mockResolvedValue({
+      intent_type: "CREATE_INVOICE",
+      message: "Invoice ready.",
+      authorization_url: "https://checkout.paystack.com/test",
+      reference: "v2v_ref_test",
+    });
+
+    const response = await POST(
+      new Request("http://localhost/api/voice/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: "Invoice John for 15000",
+          parsed_intent: {
+            intent: "CREATE_INVOICE",
+            client: "John",
+            amount: 15000,
+            memo: "Services",
+          },
+          language: "yoruba",
+        }),
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(parseTranscript).not.toHaveBeenCalled();
+    expect(dispatchIntent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        intent_type: "CREATE_INVOICE",
+        client: "John",
+        language: "yoruba",
+      }),
+      expect.any(String),
+      "Invoice John for 15000",
+      expect.objectContaining({ idempotencyHeader: null })
+    );
+  });
 });
