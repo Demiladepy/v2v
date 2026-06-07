@@ -12,12 +12,12 @@ export interface UseAudioRecorderReturn {
   error: string | null;
 }
 
-// iOS Safari uses audio/mp4; Chrome/Firefox prefer audio/webm;codecs=opus
+// iOS Safari uses audio/mp4; prefer formats STT providers accept reliably.
 function getSupportedMimeType(): string {
   const candidates = [
+    "audio/mp4",
     "audio/webm;codecs=opus",
     "audio/webm",
-    "audio/mp4",
     "audio/ogg;codecs=opus",
   ];
   if (typeof MediaRecorder === "undefined") return "";

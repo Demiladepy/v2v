@@ -1,10 +1,11 @@
 import { ok, badRequest, jsonResponse } from "@/lib/api/response";
+import { getAethexApiKey } from "@/lib/env/aethex-key";
+import { transcribeAudio } from "@/lib/transcribe/providers";
 import type { LLMResponsePayload } from "@/types";
 import {
   getSttLanguageCode,
   isInvoiceLanguage,
 } from "@/lib/constants/invoice-languages";
-import { getAethexApiKey } from "@/lib/env/aethex-key";
 
 const GROQ_MODEL = "llama-3.1-8b-instant";
 
@@ -27,9 +28,9 @@ export async function POST(request: Request) {
     }
 
     const aethexKey = getAethexApiKey();
-    const GROQ_KEY = process.env.GROQ_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY?.trim();
 
-    if (!aethexKey || !GROQ_KEY) {
+    if (!aethexKey || !groqKey) {
       return jsonResponse(503, {
         ok: false,
         error:
@@ -37,34 +38,16 @@ export async function POST(request: Request) {
       });
     }
 
-    const transcribeFormData = new FormData();
-    transcribeFormData.append("file", file);
-    transcribeFormData.append("language", sttLanguage);
-
-    const transcribeRes = await fetch("https://api.aethexai.com/api/v1/transcribe", {
-      method: "POST",
-      headers: {
-        "X-API-Key": aethexKey,
-      },
-      body: transcribeFormData,
+    const transcriptText = await transcribeAudio(file, {
+      aethexKey,
+      groqKey,
+      language: sttLanguage,
     });
-
-    if (!transcribeRes.ok) {
-      const errText = await transcribeRes.text();
-      throw new Error(`Aethana AI Transcription failed: ${errText}`);
-    }
-
-    const transcribeData = await transcribeRes.json();
-    const transcriptText = transcribeData.text;
-
-    if (!transcriptText) {
-      throw new Error("No text returned from transcription service");
-    }
 
     const llmRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_KEY}`,
+        Authorization: `Bearer ${groqKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
