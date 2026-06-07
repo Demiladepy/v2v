@@ -4,7 +4,7 @@
 
 **A voice-first financial operating layer for informal merchants across Africa and the Middle East.**
 
-*Built for the UNILAG–AFRETEC Digital Inclusion Hackathon*
+*Built for the YPIT Hackathon*
 
 <br />
 
