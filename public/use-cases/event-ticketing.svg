@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <rect width="800" height="400" fill="#F5F0EB"/>
+  <rect x="40" y="40" width="720" height="320" rx="24" fill="#7A1F2E" fill-opacity="0.08"/>
+  <circle cx="400" cy="160" r="72" fill="#7A1F2E" fill-opacity="0.15"/>
+  <path d="M370 160h60M400 130v60" stroke="#7A1F2E" stroke-width="6" stroke-linecap="round"/>
+  <rect x="120" y="260" width="140" height="56" rx="12" fill="#7A1F2E"/>
+  <rect x="280" y="260" width="140" height="56" rx="12" fill="#7A1F2E" fill-opacity="0.7"/>
+  <rect x="440" y="260" width="140" height="56" rx="12" fill="#7A1F2E" fill-opacity="0.45"/>
+  <rect x="600" y="260" width="80" height="56" rx="12" fill="#7A1F2E" fill-opacity="0.25"/>
+  <text x="190" y="295" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="14" font-weight="600">VIP</text>
+  <text x="350" y="295" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="14" font-weight="600">GA</text>
+  <text x="510" y="295" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Gate</text>
+  <circle cx="640" cy="100" r="28" fill="#7A1F2E" fill-opacity="0.2"/>
+  <path d="M628 100h24M640 88v24" stroke="#7A1F2E" stroke-width="4" stroke-linecap="round"/>
+</svg>
