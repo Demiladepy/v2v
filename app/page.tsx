@@ -81,12 +81,12 @@ export default function LandingPage() {
     {
       title: "Event Ticketing",
       desc: "Process walk-in ticket sales via voice commands instantly at the gate.",
-      img: "/use-cases/event-ticketing.svg",
+      img: "/use-cases/event-ticketing.png",
     },
     {
       title: "Inventory Restock",
       desc: "Reorder supplies vocally while auditing the stockroom, automatically updating the master ledger.",
-      img: "/use-cases/inventory-restock.svg",
+      img: "/use-cases/inventory-restock.png",
     },
     {
       title: "Customer Refunds",
