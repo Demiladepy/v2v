@@ -34,6 +34,11 @@ export function BalanceResultCard({ message, balance }: BalanceResultCardProps) 
             {formatCurrency(balance.ngn)}
           </p>
           <p className="text-sm text-muted-foreground">{message}</p>
+          {balance.kobo === 0 && (
+            <p className="text-xs text-muted-foreground/80">
+              Settled balance only — pay an invoice link to increase this total.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

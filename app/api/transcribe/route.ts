@@ -1,5 +1,10 @@
 import { ok, badRequest, jsonResponse } from "@/lib/api/response";
 import { getAethexApiKey } from "@/lib/env/aethex-key";
+import { keywordIntentParser } from "@/lib/intent/parser";
+import {
+  parseGroqIntentContent,
+  parsedIntentToLlmPayload,
+} from "@/lib/intent/parse-groq-intent";
 import { transcribeAudio } from "@/lib/transcribe/providers";
 import type { LLMResponsePayload } from "@/types";
 import {
@@ -88,8 +93,26 @@ Rules:
       throw new Error("Empty response from Groq LLM");
     }
 
-    const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
-    const parsedIntent = JSON.parse(cleanContent) as LLMResponsePayload;
+    let parsedIntent: LLMResponsePayload;
+
+    try {
+      parsedIntent = parseGroqIntentContent(content);
+    } catch (groqParseError) {
+      console.warn(
+        "Groq intent parse failed, falling back to keyword parser:",
+        groqParseError
+      );
+      try {
+        const stubParsed = await keywordIntentParser(transcriptText);
+        parsedIntent = parsedIntentToLlmPayload(stubParsed);
+      } catch {
+        const message =
+          groqParseError instanceof Error
+            ? groqParseError.message
+            : "Could not understand voice command";
+        throw new Error(message);
+      }
+    }
 
     return ok({ transcript: transcriptText, intent: parsedIntent });
   } catch (error: unknown) {
