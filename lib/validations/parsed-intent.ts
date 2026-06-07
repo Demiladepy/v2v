@@ -9,6 +9,7 @@ const createInvoiceParsedSchema = z.object({
   client: z.string().trim().min(1),
   amount: z.number().positive(),
   memo: z.string().trim().min(1),
+  language: z.enum(["english", "yoruba", "pidgin"]).optional(),
 });
 
 const checkBalanceParsedSchema = z.object({

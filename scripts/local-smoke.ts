@@ -93,7 +93,7 @@ async function main() {
   );
 
   results.push(
-    await runStep("Dashboard flow: transcribe → financial router", async () => {
+    await runStep("Dashboard flow: transcribe → voice/process", async () => {
       const blob = new Blob(["fake-audio"], { type: "audio/webm" });
       const form = new FormData();
       form.append("file", blob, "test.webm");
@@ -118,28 +118,35 @@ async function main() {
         };
       }
 
-      const routerRes = await fetch(`${localBaseUrl}/api/financial/router`, {
+      const intent = transcribeBody.data.intent ?? transcribeBody.data;
+      const transcript = transcribeBody.data.transcript ?? "";
+
+      const processRes = await fetch(`${localBaseUrl}/api/voice/process`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transcribeBody.data),
+        body: JSON.stringify({
+          transcript,
+          parsed_intent: intent,
+          language: "english",
+        }),
       });
-      const routerBody = await routerRes.json();
+      const processBody = await processRes.json();
 
-      if (routerRes.ok && routerBody.ok) {
+      if (processRes.ok && processBody.ok) {
         return {
           ok: true,
-          detail: `invoice checkout ready (${routerBody.data?.reference ?? "ok"})`,
+          detail: `voice action ok (${processBody.data?.reference ?? processBody.data?.intent_type ?? "ok"})`,
         };
       }
 
       const clearConfigError =
-        typeof routerBody.error === "string" &&
-        (routerBody.error.includes("Database is not configured") ||
-          routerBody.error.includes("Paystack is not configured"));
+        typeof processBody.error === "string" &&
+        (processBody.error.includes("Database is not configured") ||
+          processBody.error.includes("Paystack is not configured"));
 
       return {
         ok: clearConfigError,
-        detail: `${routerRes.status} ${routerBody.error ?? "unknown error"}`,
+        detail: `${processRes.status} ${processBody.error ?? "unknown error"}`,
       };
     })
   );

@@ -1,12 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLedger } from "@/hooks/useLedger";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
-export function FinancialDashboard() {
-  const { entries, balance, isLoading } = useLedger();
+export function FinancialDashboard({ refreshTrigger = 0 }: { refreshTrigger?: number }) {
+  const { entries, balance, isLoading, refresh } = useLedger();
+
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      refresh();
+    }
+  }, [refreshTrigger, refresh]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-NG", {

@@ -91,7 +91,7 @@ Rules:
     const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
     const parsedIntent = JSON.parse(cleanContent) as LLMResponsePayload;
 
-    return ok(parsedIntent);
+    return ok({ transcript: transcriptText, intent: parsedIntent });
   } catch (error: unknown) {
     console.error("Transcribe API Error:", error);
     const message =

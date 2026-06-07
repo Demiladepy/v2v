@@ -1,27 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import { AppState, InvoiceLanguage, LLMResponsePayload } from "@/types";
+import { AppState, ActionResult, InvoiceLanguage, LLMResponsePayload } from "@/types";
 import { AudioButton } from "@/components/AudioButton";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useVoiceAction } from "@/hooks/useVoiceAction";
 import { BottomNav, NavTab } from "@/components/BottomNav";
 import { FinancialDashboard } from "@/components/FinancialDashboard";
 import { CafeOneUI } from "@/components/CafeOneUI";
 import { ProfileUI } from "@/components/ProfileUI";
 import { CheckoutModule } from "@/components/CheckoutModule";
+import { BalanceResultCard } from "@/components/BalanceResultCard";
+import { NegotiationPanel } from "@/components/NegotiationPanel";
 import { InvoiceLanguagePicker } from "@/components/InvoiceLanguagePicker";
 import { resolveRecordingFileName } from "@/lib/audio/recording-file";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+
+function invoicePayloadFromAction(
+  payload: LLMResponsePayload | null
+): Extract<LLMResponsePayload, { intent: "CREATE_INVOICE" }> | null {
+  if (payload?.intent === "CREATE_INVOICE") {
+    return payload;
+  }
+  return null;
+}
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("IDLE");
   const [activeTab, setActiveTab] = useState<NavTab>("HOME");
   const [intentData, setIntentData] = useState<LLMResponsePayload | null>(null);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [actionResult, setActionResult] = useState<ActionResult | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [invoiceLanguage, setInvoiceLanguage] = useState<InvoiceLanguage>("english");
+  const [ledgerRefreshTrigger, setLedgerRefreshTrigger] = useState(0);
 
-  // Background floating orbs variants
+  const { processVoiceAction } = useVoiceAction();
+
   const floatVariants: Variants = {
     animate1: {
       y: [0, -30, 0],
@@ -35,11 +50,24 @@ export default function Home() {
     }
   };
 
-  const { startRecording, stopRecording, error: micError } = useAudioRecorder();
+  const { startRecording, stopRecording } = useAudioRecorder();
+
+  const handleVoiceActionSuccess = (result: ActionResult) => {
+    setActionResult(result);
+    setSuccessMessage(result.message);
+    setLedgerRefreshTrigger((n) => n + 1);
+
+    if (result.intent_type === "CREATE_INVOICE") {
+      setTimeout(() => setActiveTab("LEDGER"), 1500);
+    } else if (result.intent_type === "CHECK_BALANCE") {
+      setTimeout(() => setActiveTab("LEDGER"), 1500);
+    }
+  };
 
   const handleStartRecording = async () => {
     setIntentData(null);
-    setCheckoutUrl(null);
+    setActionResult(null);
+    setSuccessMessage(null);
     setActionError(null);
     const started = await startRecording();
     if (!started) {
@@ -61,7 +89,7 @@ export default function Home() {
     }
 
     setAppState("PARSING");
-    
+
     try {
       const formData = new FormData();
       formData.append("file", blob, resolveRecordingFileName(blob.type));
@@ -77,7 +105,10 @@ export default function Home() {
         throw new Error(transcribeApiResult.error || "Transcription failed");
       }
 
-      const parsed = transcribeApiResult.data as LLMResponsePayload;
+      const parsed = transcribeApiResult.data.intent as LLMResponsePayload;
+      const transcript =
+        (transcribeApiResult.data.transcript as string | undefined) ?? "";
+
       const payload: LLMResponsePayload =
         parsed.intent === "CREATE_INVOICE"
           ? { ...parsed, language: invoiceLanguage }
@@ -85,35 +116,14 @@ export default function Home() {
 
       setIntentData(payload);
 
-      const idempotencyKey =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random()}`;
-
-      const routerRes = await fetch("/api/financial/router", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": idempotencyKey,
-        },
-        body: JSON.stringify(payload),
+      const { actionResult: result } = await processVoiceAction({
+        transcript,
+        parsedIntent: payload,
+        language: invoiceLanguage,
       });
 
-      const apiResult = await routerRes.json();
-      if (!apiResult.ok) {
-        throw new Error(apiResult.error || "Processing failed");
-      }
-
-      const resultData = apiResult.data;
-      if (resultData.authorization_url) {
-        setCheckoutUrl(resultData.authorization_url);
-      }
-
+      handleVoiceActionSuccess(result);
       setAppState("SUCCESS");
-      // Switch to ledger if it's an invoice to show the checkout module
-      if (payload.intent === "CREATE_INVOICE") {
-        setTimeout(() => setActiveTab("LEDGER"), 1500);
-      }
     } catch (err) {
       console.error(err);
       setActionError(
@@ -125,21 +135,35 @@ export default function Home() {
     }
   };
 
+  const handleCafeBookingComplete = (
+    result: ActionResult,
+    payload: LLMResponsePayload
+  ) => {
+    setIntentData(payload);
+    handleVoiceActionSuccess(result);
+    setSuccessMessage("Workspace booking ready — opening checkout");
+    setActiveTab("LEDGER");
+  };
+
+  const invoicePayload = invoicePayloadFromAction(intentData);
+  const checkoutUrl =
+    actionResult?.intent_type === "CREATE_INVOICE"
+      ? actionResult.authorization_url
+      : null;
+
   return (
     <main className="flex-1 flex flex-col items-center max-w-md mx-auto w-full min-h-dvh relative overflow-hidden bg-background">
-      {/* Floating Background Elements */}
-      <motion.div 
+      <motion.div
         variants={floatVariants}
         animate="animate1"
-        className="absolute top-[10%] left-[-20%] w-80 h-80 bg-brand/5 blur-[100px] rounded-full pointer-events-none" 
+        className="absolute top-[10%] left-[-20%] w-80 h-80 bg-brand/5 blur-[100px] rounded-full pointer-events-none"
       />
-      <motion.div 
+      <motion.div
         variants={floatVariants}
         animate="animate2"
-        className="absolute bottom-[20%] right-[-20%] w-80 h-80 bg-brand-light/5 blur-[100px] rounded-full pointer-events-none" 
+        className="absolute bottom-[20%] right-[-20%] w-80 h-80 bg-brand-light/5 blur-[100px] rounded-full pointer-events-none"
       />
 
-      {/* Dynamic Tab Content */}
       <div className="w-full h-full flex flex-col relative z-10">
         <AnimatePresence mode="wait">
           {activeTab === "HOME" && (
@@ -158,7 +182,6 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Contextual Suggestions */}
               <div className="mb-8">
                 <InvoiceLanguagePicker
                   value={invoiceLanguage}
@@ -175,7 +198,7 @@ export default function Home() {
                   "Check primary balance"
                 </span>
                 <span className="px-3 py-1.5 bg-brand/10 text-brand text-xs font-semibold rounded-full border border-brand/20">
-                  "Update my profile"
+                  "Negotiate with Alao for ₦50,000"
                 </span>
               </div>
 
@@ -185,24 +208,27 @@ export default function Home() {
                 onPressStop={handleStopRecording}
               />
 
-              {/* Status Message Overlay */}
               <AnimatePresence>
                 {appState !== "IDLE" && appState !== "RECORDING" && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="mt-8 text-center px-4 h-12 flex items-center justify-center"
+                    className="mt-8 text-center px-4 min-h-12 flex items-center justify-center"
                   >
                     <p className="text-sm font-semibold text-muted-foreground font-sans bg-card/80 backdrop-blur-md py-2 px-4 rounded-full inline-block shadow-sm border border-border/50">
                       {appState === "UPLOADING" && "Uploading audio..."}
                       {appState === "PARSING" && "Extracting intent..."}
-                      {appState === "SUCCESS" && "Transaction successful"}
+                      {appState === "SUCCESS" && (successMessage ?? "Done")}
                       {appState === "ERROR" && (actionError ?? "Processing failed. Try again.")}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {actionResult?.intent_type === "RUN_NEGOTIATION" && (
+                <NegotiationPanel result={actionResult} />
+              )}
             </motion.div>
           )}
 
@@ -215,13 +241,18 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="w-full flex-1 overflow-y-auto"
             >
-              {intentData?.intent === "CREATE_INVOICE" && checkoutUrl ? (
-                <div className="p-6">
-                  <CheckoutModule intent={intentData as any} authorizationUrl={checkoutUrl} />
+              {invoicePayload && checkoutUrl ? (
+                <div className="p-6 pb-0">
+                  <CheckoutModule intent={invoicePayload} authorizationUrl={checkoutUrl} />
                 </div>
-              ) : (
-                <FinancialDashboard />
+              ) : null}
+              {actionResult?.intent_type === "CHECK_BALANCE" && (
+                <BalanceResultCard
+                  message={actionResult.message}
+                  balance={actionResult.balance}
+                />
               )}
+              <FinancialDashboard refreshTrigger={ledgerRefreshTrigger} />
             </motion.div>
           )}
 
@@ -234,7 +265,7 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="w-full flex-1 overflow-y-auto"
             >
-              <CafeOneUI />
+              <CafeOneUI onBookingComplete={handleCafeBookingComplete} />
             </motion.div>
           )}
 
