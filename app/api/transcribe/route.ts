@@ -4,6 +4,7 @@ import {
   getSttLanguageCode,
   isInvoiceLanguage,
 } from "@/lib/constants/invoice-languages";
+import { getAethexApiKey } from "@/lib/env/aethex-key";
 
 const GROQ_MODEL = "llama-3.1-8b-instant";
 
@@ -25,14 +26,14 @@ export async function POST(request: Request) {
       return badRequest("Audio file is missing");
     }
 
-    const AETHANA_KEY = process.env.AETHANA_API_KEY;
+    const aethexKey = getAethexApiKey();
     const GROQ_KEY = process.env.GROQ_API_KEY;
 
-    if (!AETHANA_KEY || !GROQ_KEY) {
+    if (!aethexKey || !GROQ_KEY) {
       return jsonResponse(503, {
         ok: false,
         error:
-          "Voice transcription is not configured. Set AETHANA_API_KEY and GROQ_API_KEY on the server.",
+          "Voice transcription is not configured. Set AETHEX_API (or AETHEX_API_KEY) and GROQ_API_KEY on the server.",
       });
     }
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     const transcribeRes = await fetch("https://api.aethexai.com/api/v1/transcribe", {
       method: "POST",
       headers: {
-        "X-API-Key": AETHANA_KEY,
+        "X-API-Key": aethexKey,
       },
       body: transcribeFormData,
     });
