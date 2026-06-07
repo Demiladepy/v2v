@@ -33,6 +33,8 @@ export function toGroqWhisperLanguage(language: string): string {
   switch (language.toLowerCase()) {
     case "yoruba":
       return "yo";
+    case "arabic":
+      return "ar";
     case "pidgin":
     case "english":
     default:

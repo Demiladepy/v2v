@@ -69,6 +69,7 @@ Given a voice transcript, return ONLY valid JSON matching one of these:
 
 Rules:
 - amount must be a number. ₦150,000 = 150000, "fifty thousand" = 50000
+- Transcript may be English, Yoruba, Pidgin, or Arabic — always return English JSON field names
 - Extract client, amount, and memo from the transcript — never reuse example values
 - Return ONLY the JSON. No explanation, no extra text.`,
           },

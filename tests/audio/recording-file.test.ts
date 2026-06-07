@@ -20,6 +20,7 @@ describe("recording file helpers", () => {
   it("maps invoice languages to whisper codes", () => {
     expect(toGroqWhisperLanguage("english")).toBe("en");
     expect(toGroqWhisperLanguage("yoruba")).toBe("yo");
+    expect(toGroqWhisperLanguage("arabic")).toBe("ar");
     expect(toGroqWhisperLanguage("pidgin")).toBe("en");
   });
 });

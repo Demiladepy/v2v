@@ -10,11 +10,13 @@ describe("invoice languages", () => {
     expect(isInvoiceLanguage("english")).toBe(true);
     expect(isInvoiceLanguage("yoruba")).toBe(true);
     expect(isInvoiceLanguage("pidgin")).toBe(true);
+    expect(isInvoiceLanguage("arabic")).toBe(true);
     expect(isInvoiceLanguage("french")).toBe(false);
   });
 
   it("maps language ids to labels and STT codes", () => {
     expect(getInvoiceLanguageLabel("pidgin")).toBe("Pidgin");
     expect(getSttLanguageCode("yoruba")).toBe("yoruba");
+    expect(getSttLanguageCode("arabic")).toBe("arabic");
   });
 });
