@@ -81,12 +81,12 @@ export default function LandingPage() {
     {
       title: "Event Ticketing",
       desc: "Process walk-in ticket sales via voice commands instantly at the gate.",
-      img: "https://images.unsplash.com/photo-1540039155733-d7696d4eb98e?auto=format&fit=crop&q=80&w=800&h=400",
+      img: "/use-cases/event-ticketing.svg",
     },
     {
       title: "Inventory Restock",
       desc: "Reorder supplies vocally while auditing the stockroom, automatically updating the master ledger.",
-      img: "https://images.unsplash.com/photo-1587293852726-0d614afa0bc8?auto=format&fit=crop&q=80&w=800&h=400",
+      img: "/use-cases/inventory-restock.svg",
     },
     {
       title: "Customer Refunds",
@@ -94,6 +94,46 @@ export default function LandingPage() {
       img: "https://images.unsplash.com/photo-1556745753-b2904692b3cd?auto=format&fit=crop&q=80&w=800&h=400",
     },
   ];
+
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const openUseCase = (index: number) => {
+    setActiveUseCase(index);
+    window.setTimeout(() => {
+      document.getElementById("use-cases")?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+
+    if (hash === "event-ticketing") {
+      openUseCase(3);
+      return;
+    }
+    if (hash === "inventory-restock") {
+      openUseCase(4);
+      return;
+    }
+
+    scrollToSection(hash);
+  }, []);
+
+  const FOOTER_LINKS = {
+    product: [
+      { label: "Features", action: () => scrollToSection("features") },
+      { label: "Integrations", action: () => scrollToSection("integrations") },
+      { label: "Use Cases", action: () => scrollToSection("use-cases") },
+    ],
+    company: [
+      { label: "How it Works", action: () => scrollToSection("how-it-works") },
+      { label: "Event Ticketing", action: () => openUseCase(3) },
+      { label: "Inventory Restock", action: () => openUseCase(4) },
+    ],
+  };
 
   return (
     <main className="flex-1 flex flex-col bg-[var(--cream-bg)] min-h-dvh font-sans w-full overflow-clip relative text-foreground">
@@ -505,12 +545,12 @@ export default function LandingPage() {
                         <p className="text-lg text-muted-foreground leading-relaxed flex-1">
                           {uc.desc}
                         </p>
-                        <div className="flex-1 w-full max-w-md h-48 rounded-3xl overflow-hidden relative shadow-lg">
-                          <div className="absolute inset-0 bg-brand/20 mix-blend-color z-10 pointer-events-none" />
+                        <div className="flex-1 w-full max-w-md h-48 rounded-3xl overflow-hidden relative shadow-lg bg-[var(--cream-bg)]">
+                          <div className="absolute inset-0 bg-brand/10 mix-blend-multiply z-10 pointer-events-none" />
                           <img
                             src={uc.img}
                             alt={uc.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                         </div>
                       </div>
@@ -524,7 +564,10 @@ export default function LandingPage() {
       </section>
 
       {/* 6. Integration & Security (Infinite Marquee) */}
-      <section className="w-full py-24 bg-foreground text-background overflow-hidden relative flex flex-col items-center">
+      <section
+        id="integrations"
+        className="w-full py-24 bg-foreground text-background overflow-hidden relative flex flex-col items-center"
+      >
         <div className="text-center mb-12 px-6 z-10 relative">
           <Layers className="w-12 h-12 text-brand-light mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4 font-serif">
@@ -566,12 +609,18 @@ export default function LandingPage() {
       </section>
 
       {/* 7. Footer */}
-      <footer className="w-full bg-[var(--brand-dark)] text-white pt-24 pb-12 px-6 border-t border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16 mb-20">
-          <div className="max-w-md">
-            <h2 className="text-4xl font-black tracking-tighter mb-6 font-serif">
+      <footer
+        id="cta"
+        className="w-full bg-[var(--brand-dark)] text-white pt-28 pb-16 px-6 sm:px-8 border-t border-white/10"
+      >
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-20 lg:gap-24 mb-24">
+          <div className="max-w-lg space-y-8">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter font-serif leading-[1.1]">
               Ready to transform your workflow?
             </h2>
+            <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-md">
+              Start with voice invoices, balance checks, and B2B negotiation — all from one dashboard.
+            </p>
             <Link href="/login">
               <button className="py-4 px-8 bg-white text-brand-dark font-bold text-lg rounded-full flex items-center gap-3 transition-all shadow-xl hover:-translate-y-1 active:scale-95 group">
                 Get Started Now{" "}
@@ -580,47 +629,60 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="flex gap-12 sm:gap-24 text-sm font-medium">
-            <div className="flex flex-col gap-4">
-              <span className="text-white/50 uppercase tracking-widest text-xs font-bold mb-2">
+          <div className="grid grid-cols-2 gap-12 sm:gap-20 lg:gap-24 text-sm font-medium w-full lg:w-auto">
+            <div className="flex flex-col gap-5">
+              <span className="text-white/50 uppercase tracking-[0.2em] text-xs font-bold mb-1">
                 Product
               </span>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                Features
-              </a>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                Integrations
-              </a>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                Pricing
-              </a>
+              {FOOTER_LINKS.product.map((link) => (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={link.action}
+                  className="text-left text-white/80 hover:text-white transition-colors leading-relaxed"
+                >
+                  {link.label}
+                </button>
+              ))}
             </div>
-            <div className="flex flex-col gap-4">
-              <span className="text-white/50 uppercase tracking-widest text-xs font-bold mb-2">
-                Company
+            <div className="flex flex-col gap-5">
+              <span className="text-white/50 uppercase tracking-[0.2em] text-xs font-bold mb-1">
+                Workflows
               </span>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                About Us
-              </a>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                Careers
-              </a>
-              <a href="#" className="hover:text-white/70 transition-colors">
-                Legal
-              </a>
+              {FOOTER_LINKS.company.map((link) => (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={link.action}
+                  className="text-left text-white/80 hover:text-white transition-colors leading-relaxed"
+                >
+                  {link.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-white/40">
-          <p>© 2026 V2V. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-white/70 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white/70 transition-colors">
-              Terms of Service
-            </a>
+        <div
+          id="legal"
+          className="max-w-7xl mx-auto border-t border-white/10 pt-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-sm font-medium text-white/50"
+        >
+          <p className="leading-relaxed">© 2026 V2V. All rights reserved.</p>
+          <div className="flex items-center gap-8">
+            <button
+              type="button"
+              onClick={() => scrollToSection("cta")}
+              className="hover:text-white transition-colors leading-relaxed"
+            >
+              Get Started
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("integrations")}
+              className="hover:text-white transition-colors leading-relaxed"
+            >
+              Integrations
+            </button>
           </div>
         </div>
       </footer>
