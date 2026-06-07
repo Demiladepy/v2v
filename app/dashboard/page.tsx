@@ -9,8 +9,7 @@ import { FinancialDashboard } from "@/components/FinancialDashboard";
 import { CafeOneUI } from "@/components/CafeOneUI";
 import { ProfileUI } from "@/components/ProfileUI";
 import { CheckoutModule } from "@/components/CheckoutModule";
-import { InvoiceLanguagePicker } from "@/components/InvoiceLanguagePicker";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { resolveRecordingFileName } from "@/lib/audio/recording-file";
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("IDLE");
@@ -63,7 +62,7 @@ export default function Home() {
     
     try {
       const formData = new FormData();
-      formData.append("file", blob, "recording.webm");
+      formData.append("file", blob, resolveRecordingFileName(blob.type));
       formData.append("language", invoiceLanguage);
 
       const res = await fetch("/api/transcribe", {
