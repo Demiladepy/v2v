@@ -551,6 +551,6 @@ MIT — see [LICENSE](./LICENSE) (to be added).
 
 **V2V — From voice to value, in seconds.**
 
-*UNILAG–AFRETEC Digital Inclusion Hackathon · 2026*
+*Young People in Tech Hackathon · 2026*
 
 </div>
